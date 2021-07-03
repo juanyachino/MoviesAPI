@@ -24,6 +24,9 @@ public class Movie {
     @ManyToMany(mappedBy = "characters", fetch = FetchType.LAZY)
     private Set<Character> students = new HashSet<>();
 
+    @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
+    private Set<Character> genres = new HashSet<>();
+
     public Integer getId() {
         return id;
     }
@@ -65,5 +68,9 @@ public class Movie {
 
     public Set<Character> getStudents() {
         return students;
+    }
+
+    public Set<Character> getGenres() {
+        return genres;
     }
 }

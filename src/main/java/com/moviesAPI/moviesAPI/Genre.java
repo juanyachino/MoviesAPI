@@ -1,6 +1,8 @@
 package com.moviesAPI.moviesAPI;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity // This tells Hibernate to make a table out of this class
@@ -14,6 +16,16 @@ public class Genre {
     private byte[] image;
 
     private String name;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "genres_movies",
+            joinColumns = {
+                    @JoinColumn(name = "genre_id", referencedColumnName = "id",
+                            nullable = false, updatable = false)},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "movie_id", referencedColumnName = "id",
+                            nullable = false, updatable = false)})
+    private Set<Movie> movies = new HashSet<>();
 
     public Integer getId() {
         return id;
@@ -38,4 +50,7 @@ public class Genre {
         this.name = name;
     }
 
+    public Set<Movie> getMovies() {
+        return movies;
+    }
 }
