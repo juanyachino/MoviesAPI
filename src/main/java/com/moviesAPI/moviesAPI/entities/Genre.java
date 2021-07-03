@@ -6,6 +6,7 @@ import java.util.Set;
 
 
 @Entity // This tells Hibernate to make a table out of this class
+@Table(name = "genres")
 public class Genre {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -25,7 +26,7 @@ public class Genre {
             inverseJoinColumns = {
                     @JoinColumn(name = "movie_id", referencedColumnName = "id",
                             nullable = false, updatable = false)})
-    private Set<Movie> moviesOfThisGenre = new HashSet<>();
+    Set<Movie> movies = new HashSet<>();
 
     public Integer getId() {
         return id;
@@ -51,6 +52,6 @@ public class Genre {
     }
 
     public Set<Movie> getMovies() {
-        return moviesOfThisGenre;
+        return movies;
     }
 }

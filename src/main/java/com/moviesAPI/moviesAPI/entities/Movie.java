@@ -6,6 +6,7 @@ import java.util.Set;
 
 
 @Entity // This tells Hibernate to make a table out of this class
+@Table(name = "movies")
 public class Movie {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -21,10 +22,10 @@ public class Movie {
 
     private Integer rating;
 
-    @ManyToMany(mappedBy = "moviesPlayed", fetch = FetchType.LAZY)
-    private Set<Character> students = new HashSet<>();
+    @ManyToMany(mappedBy = "movies", fetch = FetchType.LAZY)
+    private Set<Character> characters = new HashSet<>();
 
-    @ManyToMany(mappedBy = "moviesOfThisGenre", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "movies", fetch = FetchType.LAZY)
     private Set<Character> genres = new HashSet<>();
 
     public Integer getId() {
@@ -66,8 +67,8 @@ public class Movie {
         this.rating = rating;
     }
 
-    public Set<Character> getStudents() {
-        return students;
+    public Set<Character> getCharacters() {
+        return characters;
     }
 
     public Set<Character> getGenres() {
