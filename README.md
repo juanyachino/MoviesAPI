@@ -1,12 +1,12 @@
-MOVIESAPI 
-Using JPA with mysql access implementation.
+## MOVIESAPI 
+# Using JPA with mysql access implementation.
 https://spring.io/guides/gs/accessing-data-mysql/
 
-Run app:
+# Run app:
 
 > ./mvnw spring-boot:run
 
-Database setup:
+# Database setup:
 > mysql> create database movies; -- Creates the new database
 > 
 > mysql> create user 'springuser'@'%' identified by 'ThePassword'; -- Creates the user
