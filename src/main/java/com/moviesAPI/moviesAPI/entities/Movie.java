@@ -1,4 +1,4 @@
-package com.moviesAPI.moviesAPI;
+package com.moviesAPI.moviesAPI.entities;
 
 import javax.persistence.*;
 import java.util.HashSet;

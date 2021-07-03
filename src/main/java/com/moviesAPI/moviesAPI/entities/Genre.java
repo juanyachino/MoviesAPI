@@ -1,4 +1,4 @@
-package com.moviesAPI.moviesAPI;
+package com.moviesAPI.moviesAPI.entities;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -6,7 +6,7 @@ import java.util.Set;
 
 
 @Entity // This tells Hibernate to make a table out of this class
-public class Character {
+public class Genre {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
@@ -17,22 +17,15 @@ public class Character {
 
     private String name;
 
-    private Integer age;
-
-    private Integer weight;
-
-    private String story;
-
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "characters_movies",
+    @JoinTable(name = "genres_movies",
             joinColumns = {
-                    @JoinColumn(name = "character_id", referencedColumnName = "id",
+                    @JoinColumn(name = "genre_id", referencedColumnName = "id",
                             nullable = false, updatable = false)},
             inverseJoinColumns = {
                     @JoinColumn(name = "movie_id", referencedColumnName = "id",
                             nullable = false, updatable = false)})
-    private Set<Movie> moviesPlayed = new HashSet<>();
-
+    private Set<Movie> moviesOfThisGenre = new HashSet<>();
 
     public Integer getId() {
         return id;
@@ -56,30 +49,8 @@ public class Character {
     public void setName(String name) {
         this.name = name;
     }
-    public Integer getAge() {
-        return age;
-    }
 
-    public void setAge(Integer age) {
-        this.age = age;
+    public Set<Movie> getMovies() {
+        return moviesOfThisGenre;
     }
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Integer weight) {
-        this.weight = weight;
-    }
-    public String getStory() {
-        return story;
-    }
-
-    public void setStory(String story) {
-        this.story = story;
-    }
-
-    public Set<Movie> getCourses() {
-        return moviesPlayed;
-    }
-
 }
