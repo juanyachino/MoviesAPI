@@ -1,6 +1,8 @@
 package com.moviesAPI.moviesAPI;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity // This tells Hibernate to make a table out of this class
@@ -20,6 +22,17 @@ public class Character {
     private Integer weight;
 
     private String story;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "characters_movies",
+            joinColumns = {
+                    @JoinColumn(name = "character_id", referencedColumnName = "id",
+                            nullable = false, updatable = false)},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "movie_id", referencedColumnName = "id",
+                            nullable = false, updatable = false)})
+    private Set<Movie> courses = new HashSet<>();
+
 
     public Integer getId() {
         return id;
@@ -64,4 +77,9 @@ public class Character {
     public void setStory(String story) {
         this.story = story;
     }
+
+    public Set<Movie> getCourses() {
+        return courses;
+    }
+
 }
