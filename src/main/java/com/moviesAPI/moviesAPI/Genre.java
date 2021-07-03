@@ -25,7 +25,7 @@ public class Genre {
             inverseJoinColumns = {
                     @JoinColumn(name = "movie_id", referencedColumnName = "id",
                             nullable = false, updatable = false)})
-    private Set<Movie> movies = new HashSet<>();
+    private Set<Movie> moviesOfThisGenre = new HashSet<>();
 
     public Integer getId() {
         return id;
@@ -51,6 +51,6 @@ public class Genre {
     }
 
     public Set<Movie> getMovies() {
-        return movies;
+        return moviesOfThisGenre;
     }
 }

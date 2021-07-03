@@ -21,10 +21,10 @@ public class Movie {
 
     private Integer rating;
 
-    @ManyToMany(mappedBy = "characters", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "moviesPlayed", fetch = FetchType.LAZY)
     private Set<Character> students = new HashSet<>();
 
-    @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "moviesOfThisGenre", fetch = FetchType.LAZY)
     private Set<Character> genres = new HashSet<>();
 
     public Integer getId() {

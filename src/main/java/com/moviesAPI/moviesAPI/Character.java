@@ -31,7 +31,7 @@ public class Character {
             inverseJoinColumns = {
                     @JoinColumn(name = "movie_id", referencedColumnName = "id",
                             nullable = false, updatable = false)})
-    private Set<Movie> courses = new HashSet<>();
+    private Set<Movie> moviesPlayed = new HashSet<>();
 
 
     public Integer getId() {
@@ -79,7 +79,7 @@ public class Character {
     }
 
     public Set<Movie> getCourses() {
-        return courses;
+        return moviesPlayed;
     }
 
 }
