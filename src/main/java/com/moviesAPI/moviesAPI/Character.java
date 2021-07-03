@@ -1,9 +1,6 @@
 package com.moviesAPI.moviesAPI;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 
 @Entity // This tells Hibernate to make a table out of this class
@@ -12,7 +9,9 @@ public class Character {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
 
-    private Integer imageId;
+    @Lob
+    @Column(name = "image", columnDefinition="BLOB")
+    private byte[] image;
 
     private String name;
 
@@ -29,12 +28,12 @@ public class Character {
     public void setId(Integer id) {
         this.id = id;
     }
-    public Integer getImageId() {
-        return imageId;
+    public byte[] getImage() {
+        return image;
     }
 
-    public void setImageId(Integer id) {
-        this.imageId = id;
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     public String getName() {
