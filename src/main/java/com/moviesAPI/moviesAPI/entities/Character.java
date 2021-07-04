@@ -79,7 +79,7 @@ public class Character {
         this.story = story;
     }
 
-    public Set<Movie> getCourses() {
+    public Set<Movie> getMovies() {
         return movies;
     }
 

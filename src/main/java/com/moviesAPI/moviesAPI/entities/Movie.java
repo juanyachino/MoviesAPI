@@ -1,5 +1,7 @@
 package com.moviesAPI.moviesAPI.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,9 +25,11 @@ public class Movie {
     private Integer rating;
 
     @ManyToMany(mappedBy = "movies", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Character> characters = new HashSet<>();
 
     @ManyToMany(mappedBy = "movies", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Character> genres = new HashSet<>();
 
     public Integer getId() {
