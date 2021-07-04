@@ -5,6 +5,7 @@ import com.moviesAPI.moviesAPI.entities.Movie;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Controller // This means that this class is a Controller
+@Validated
 @RequestMapping(path="/movies") // This means URL's start with /movies (after Application path)
 public class MovieController {
     @Autowired // This means to get the bean called movieRepository
@@ -41,5 +43,9 @@ public class MovieController {
     public @ResponseBody Iterable<Movie> getAllMovies() {
         // This returns a JSON or XML with the characters
         return movieRepository.findAll();
+    }
+    @PostMapping(path="/test")
+    public @ResponseBody String postTest(@RequestParam String name){
+        return "hello" + name;
     }
 }

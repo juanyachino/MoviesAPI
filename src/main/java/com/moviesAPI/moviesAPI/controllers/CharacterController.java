@@ -7,6 +7,7 @@ import com.moviesAPI.moviesAPI.entities.Character;
 import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @Controller // This means that this class is a Controller
+@Validated
 @RequestMapping(path="/characters") // This means URL's start with /characters (after Application path)
 public class CharacterController {
     @Autowired // This means to get the bean called characterRepository
@@ -26,8 +28,8 @@ public class CharacterController {
     public @ResponseBody String addNewCharacter (@RequestParam String name,
                                                  @RequestParam String story,
                                                  @RequestParam Integer age,
-                                                 @RequestParam Integer weight,
-                                                 @RequestParam MultipartFile multipartImage) throws IOException {
+                                                 @RequestParam Integer weight/*,
+                                                 @RequestParam MultipartFile multipartImage*/) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
@@ -36,7 +38,7 @@ public class CharacterController {
         character.setAge(age);
         character.setStory(story);
         character.setWeight(weight);
-        character.setImage(multipartImage.getBytes());
+       // character.setImage(multipartImage.getBytes());
         characterRepository.save(character);
         return "Saved";
     }
