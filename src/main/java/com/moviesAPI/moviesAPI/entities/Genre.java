@@ -10,7 +10,7 @@ import java.util.Set;
 public class Genre {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Integer id;
+    private Long id;
 
     @Lob
     @Column(name = "image", columnDefinition="BLOB")
@@ -28,13 +28,11 @@ public class Genre {
                             nullable = false, updatable = false)})
     Set<Movie> movies = new HashSet<>();
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+
     public byte[] getImage() {
         return image;
     }

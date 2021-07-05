@@ -10,7 +10,7 @@ import java.util.Set;
 public class Character {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Integer id;
+    private long id;
 
     @Lob
     @Column(name = "image", columnDefinition="BLOB")
@@ -35,7 +35,7 @@ public class Character {
     Set<Movie> movies = new HashSet<>();
 
 
-    public Integer getId() {
+    public long getId() {
         return id;
     }
 
