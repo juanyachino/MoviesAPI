@@ -107,11 +107,11 @@ public class CharacterController {
         }
         return characters.get(0);
     }
-    //@GetMapping(path="/")
+    /*@GetMapping(path="/")
     public @ResponseBody Iterable<Character> getAllCharacters() {
         // This returns a JSON or XML with the characters
         return characterRepository.findAll();
-    }
+    } */
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
     Object filterBy(@RequestParam(value = "age",required = false) Integer age,
@@ -133,6 +133,6 @@ public class CharacterController {
                 return movies.get().getCharacters();
             }
         }
-        return characterRepository.findAll(); //returns all if no params were given
+        return characterRepository.findBy(); //returns all characters in list view if no params were given
     }
 }
