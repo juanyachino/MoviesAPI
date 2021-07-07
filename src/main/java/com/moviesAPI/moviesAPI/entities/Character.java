@@ -83,4 +83,7 @@ public class Character {
         return movies;
     }
 
+    public void setMovies(Set<Movie> movies) {
+        this.movies = movies;
+    }
 }
