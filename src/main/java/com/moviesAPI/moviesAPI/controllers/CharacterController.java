@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Description;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -113,9 +113,11 @@ public class CharacterController {
         return characterRepository.findAll();
     }
     @RequestMapping(method = RequestMethod.GET)
-    public @ResponseBody Iterable<Character> filterby(@RequestParam(value = "age",required = false) Integer age,
-                                                      @RequestParam(value = "name",required = false) String name,
-                                                      @RequestParam(value = "weight",required = false) Integer weight) {
+    public @ResponseBody
+    Object filterBy(@RequestParam(value = "age",required = false) Integer age,
+                    @RequestParam(value = "name",required = false) String name,
+                    @RequestParam(value = "weight",required = false) Integer weight,
+                    @RequestParam(value = "movieId",required = false) Long movieId) {
         if (age != null) {
             return characterRepository.findByAge(age);
         }
@@ -124,6 +126,12 @@ public class CharacterController {
         }
         if (weight != null) {
             return characterRepository.findByWeight(weight);
+        }
+        if (movieId != null) {
+            Optional<Movie> movies = movieRepository.findById(movieId);
+            if (movies.isPresent()){
+                return movies.get().getCharacters();
+            }
         }
         return characterRepository.findAll(); //returns all if no params were given
     }
