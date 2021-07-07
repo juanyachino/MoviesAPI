@@ -14,8 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Controller // This means that this class is a Controller
 @Validated
@@ -108,9 +107,24 @@ public class CharacterController {
         }
         return characters.get(0);
     }
-    @GetMapping(path="/")
+    //@GetMapping(path="/")
     public @ResponseBody Iterable<Character> getAllCharacters() {
         // This returns a JSON or XML with the characters
         return characterRepository.findAll();
+    }
+    @RequestMapping(method = RequestMethod.GET)
+    public @ResponseBody Iterable<Character> filterby(@RequestParam(value = "age",required = false) Integer age,
+                                                      @RequestParam(value = "name",required = false) String name,
+                                                      @RequestParam(value = "weight",required = false) Integer weight) {
+        if (age != null) {
+            return characterRepository.findByAge(age);
+        }
+        if (name != null) {
+            return characterRepository.findByName(name);
+        }
+        if (weight != null) {
+            return characterRepository.findByWeight(weight);
+        }
+        return characterRepository.findAll(); //returns all if no params were given
     }
 }
