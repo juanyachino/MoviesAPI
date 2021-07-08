@@ -18,7 +18,7 @@ public class Genre {
 
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "genres_movies",
             joinColumns = {
                     @JoinColumn(name = "genre_id", referencedColumnName = "id",

@@ -24,7 +24,7 @@ public class Character {
 
     private String story;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "characters_movies",
             joinColumns = {
                     @JoinColumn(name = "character_id", referencedColumnName = "id",

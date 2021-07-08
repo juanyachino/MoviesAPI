@@ -11,4 +11,15 @@ import java.util.List;
 public interface MovieRepository extends CrudRepository<Movie, Long> {
     List<Movie> findByTitle(String title);
 
+    List<Movie> findByOrderByDateAsc();
+    List<Movie> findByOrderByDateDesc();
+    Iterable<MoviesListView> findBy();
+
+
+    interface MoviesListView {
+
+        byte[] getImage();
+        String getTitle();
+        String getDate();
+    }
 }

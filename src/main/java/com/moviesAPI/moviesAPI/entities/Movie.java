@@ -24,13 +24,21 @@ public class Movie {
 
     private Integer rating;
 
-    @ManyToMany(mappedBy = "movies", fetch = FetchType.LAZY)
+    public void setCharacters(Set<Character> characters) {
+        this.characters = characters;
+    }
+
+    public void setGenres(Set<Genre> genres) {
+        this.genres = genres;
+    }
+
+    @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Character> characters = new HashSet<>();
 
-    @ManyToMany(mappedBy = "movies", fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)
     @JsonIgnore
-    private Set<Character> genres = new HashSet<>();
+    private Set<Genre> genres = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -73,7 +81,7 @@ public class Movie {
         return characters;
     }
 
-    public Set<Character> getGenres() {
+    public Set<Genre> getGenres() {
         return genres;
     }
 }
