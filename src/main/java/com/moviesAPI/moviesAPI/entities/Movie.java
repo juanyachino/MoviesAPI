@@ -1,6 +1,7 @@
 package com.moviesAPI.moviesAPI.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -33,11 +34,11 @@ public class Movie {
     }
 
     @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @JsonManagedReference
     private Set<Character> characters = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @JsonManagedReference
     private Set<Genre> genres = new HashSet<>();
 
     public Long getId() {
