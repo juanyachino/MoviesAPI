@@ -6,6 +6,14 @@ https://spring.io/guides/gs/accessing-data-mysql/
 
 > ./mvnw spring-boot:run
 
+# application.properties file
+
+> spring.jpa.hibernate.ddl-auto=update   -> Updates current schema if there are
+> any changes, it keeps the DB info also.
+> 
+> spring.jpa.hibernate.ddl-auto=create-drop  -> Drops the database schema every time the server starts
+> .May throw DDL exceptions.
+
 # Database setup:
 > mysql> create database movies; -- Creates the new database
 > 
