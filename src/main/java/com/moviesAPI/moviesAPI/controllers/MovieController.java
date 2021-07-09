@@ -34,8 +34,8 @@ public class MovieController {
     public @ResponseBody String addNewMovie (@RequestParam String title,
                                                  @RequestParam String date,
                                                  @RequestParam Integer rating,
-                                                 @RequestParam List<String> genresNames,
-                                                 @RequestParam List<String> charactersNames/*,
+                                                 @RequestParam(required = false) List<Long> genresIds,
+                                                 @RequestParam(required = false) List<Long> charactersIds/*,
                                                  @RequestParam MultipartFile multipartImage*/) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
@@ -47,18 +47,18 @@ public class MovieController {
         //movie.setImage(multipartImage.getBytes());
 
         //only previously added characters will be added to movie
-        for(String characterName : charactersNames){
-            List<Character> characters = characterRepository.findByName(characterName);
-            if (!characters.isEmpty()) {
-                Character character = characters.get(0);
+        for(Long characterId : charactersIds){
+            Optional<Character> characters = characterRepository.findById(characterId);
+            if (characters.isPresent()) {
+                Character character = characters.get();
                 character.getMovies().add(movie);
                 movie.getCharacters().add(character);
             }
         }
-        for(String genreName : genresNames){
-            List<Genre> genres = genreRepository.findByName(genreName);
-            if (!genres.isEmpty()) {
-                Genre genre = genres.get(0);
+        for(Long genreId : genresIds){
+            Optional<Genre> genres = genreRepository.findById(genreId);
+            if (genres.isPresent()) {
+                Genre genre = genres.get();
                 genre.getMovies().add(movie);
                 movie.getGenres().add(genre);
             }
@@ -72,9 +72,9 @@ public class MovieController {
     public @ResponseBody String editMovie (@RequestParam String title,
                                                @RequestParam(required = false) String date,
                                                @RequestParam(required = false) Integer rating,
-                                               @RequestParam(required = false) List<String> charactersNames,
-                                               @RequestParam(required = false) List<String> genresNames/*,
-                                                 @RequestParam(required = false) MultipartFile multipartImage*/) throws IOException {
+                                               @RequestParam(required = false) List<Long> charactersIds,
+                                               @RequestParam(required = false) List<Long> genresIds/*,
+                                               @RequestParam(required = false) MultipartFile multipartImage*/) throws IOException {
         List<Movie> movies = movieRepository.findByTitle(title);
         if (movies.isEmpty()) {
             return "Movie doesn't exist!";
@@ -87,40 +87,40 @@ public class MovieController {
             movie.setRating(rating);
         }
 
-        if (charactersNames != null) {
+        if (charactersIds != null) {
             movie.setCharacters(new HashSet<>());  //removes previously added characters!
-            for(String characterName : charactersNames){
-                List<Character> characters = characterRepository.findByName(characterName);
-                if (!characters.isEmpty()) {
-                    Character character = characters.get(0);
+            for(Long characterId : charactersIds){
+                Optional<Character> characters = characterRepository.findById(characterId);
+                if (characters.isPresent()) {
+                    Character character = characters.get();
                     character.getMovies().add(movie);
                     movie.getCharacters().add(character);
                 }
             }
         }
-        if (genresNames != null) {
+        if (genresIds != null) {
             movie.setCharacters(new HashSet<>());  //removes previously added genres!
-            for(String genreName : genresNames){
-                List<Genre> genres = genreRepository.findByName(genreName);
-                if (!genres.isEmpty()) {
-                    Genre genre = genres.get(0);
+            for(Long genreId : genresIds){
+                Optional<Genre> genres = genreRepository.findById(genreId);
+                if (genres.isPresent()) {
+                    Genre genre = genres.get();
                     genre.getMovies().add(movie);
                     movie.getGenres().add(genre);
                 }
             }
         }
         movieRepository.save(movie);
-        return "Updated!";
+        return title + " Updated!";
     }
 
     @DeleteMapping(path="/delete")
-    public @ResponseBody String deleteMovie(@RequestParam String title) {
-        List<Movie> movies = movieRepository.findByTitle(title);
-        if (movies.isEmpty()) {
+    public @ResponseBody String deleteMovie(@RequestParam Long id) {
+        Optional<Movie> movies = movieRepository.findById(id);
+        if (!movies.isPresent()) {
             return "movie not found!";
         }
-        movieRepository.delete(movies.get(0));
-        return title +" deleted!";
+        movieRepository.delete(movies.get());
+        return id +" deleted!";
     }
 
     @GetMapping(path= "/detail")

@@ -1,7 +1,6 @@
 package com.moviesAPI.moviesAPI.controllers;
 
 
-import com.moviesAPI.moviesAPI.entities.Character;
 import com.moviesAPI.moviesAPI.entities.Genre;
 import com.moviesAPI.moviesAPI.entities.Movie;
 import com.moviesAPI.moviesAPI.repositories.GenreRepository;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Controller // This means that this class is a Controller
 @Validated
@@ -29,7 +29,7 @@ public class GenreController {
 
     @PostMapping(path="/add") // Map ONLY POST Requests
     public @ResponseBody
-    String addNewGenre (@RequestParam String name, @RequestParam List<String> moviesTitles /*,
+    String addNewGenre (@RequestParam String name, @RequestParam List<Long> moviesIds /*,
                                                  @RequestParam MultipartFile multipartImage*/) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
@@ -39,16 +39,16 @@ public class GenreController {
         //genre.setImage(multipartImage.getBytes());
 
         //only previously added movies will be added to genre
-        for(String movieTitle : moviesTitles){
-            List<Movie> movies = movieRepository.findByTitle(movieTitle);
-            if (!movies.isEmpty()) {
-                Movie movie = movies.get(0);
+        for(Long movieId : moviesIds){
+            Optional<Movie> movies = movieRepository.findById(movieId);
+            if (movies.isPresent()) {
+                Movie movie = movies.get();
                 genre.getMovies().add(movie);
                 movie.getGenres().add(genre);
             }
         }
 
         genreRepository.save(genre);
-        return name + " Saved";
+        return name + " Saved!";
     }
 }

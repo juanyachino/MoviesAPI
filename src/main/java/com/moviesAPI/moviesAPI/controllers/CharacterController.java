@@ -31,7 +31,7 @@ public class CharacterController {
                                                  @RequestParam String story,
                                                  @RequestParam Integer age,
                                                  @RequestParam Integer weight,
-                                                 @RequestParam(required = false) List<String> moviesTitles /*,
+                                                 @RequestParam(required = false) List<Long> moviesIds /*,
                                                  @RequestParam MultipartFile multipartImage*/) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
@@ -42,10 +42,10 @@ public class CharacterController {
         character.setStory(story);
         character.setWeight(weight);
         //only previously added movies will be added to character
-        for(String movieTitle : moviesTitles){
-            List<Movie> movies = movieRepository.findByTitle(movieTitle);
-            if (!movies.isEmpty()) {
-                Movie movie = movies.get(0);
+        for(Long movieId : moviesIds){
+            Optional<Movie> movies = movieRepository.findById(movieId);
+            if (movies.isPresent()) {
+                Movie movie = movies.get();
                 character.getMovies().add(movie);
                 movie.getCharacters().add(character);
             }
@@ -61,7 +61,7 @@ public class CharacterController {
                                                  @RequestParam(required = false) String story,
                                                  @RequestParam(required = false) Integer age,
                                                  @RequestParam(required = false) Integer weight,
-                                                 @RequestParam(required = false) List<String> moviesTitles /*,
+                                                 @RequestParam(required = false) List<Long> moviesIds /*,
                                                  @RequestParam(required = false) MultipartFile multipartImage*/) throws IOException {
         Optional<Character> characters = characterRepository.findById(id);
         if (!characters.isPresent()) {
@@ -80,12 +80,12 @@ public class CharacterController {
         if (weight != null) {
             character.setWeight(weight);
         }
-        if (moviesTitles != null) {
+        if (moviesIds != null) {
             character.setMovies(new HashSet<>());  //removes previously added movies!
-            for(String movieTitle : moviesTitles){
-                List<Movie> movies = movieRepository.findByTitle(movieTitle);
-                if (!movies.isEmpty()) {
-                    Movie movie = movies.get(0);
+            for(Long movieId : moviesIds){
+                Optional<Movie> movies = movieRepository.findById(movieId);
+                if (movies.isPresent()) {
+                    Movie movie = movies.get();
                     character.getMovies().add(movie);
                     movie.getCharacters().add(character);
                 }
