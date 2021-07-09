@@ -33,7 +33,7 @@ public class MoviesApiApplication {
 		return String.format("Hello %s!", name);
 	}
 
-	@Bean
+	/*@Bean
 	public CommandLineRunner mappingDemo(CharacterRepository characterRepository,
 										 GenreRepository genreRepository,
 										 MovieRepository movieRepository) {
@@ -82,6 +82,6 @@ public class MoviesApiApplication {
 			// update the character
 			characterRepository.save(character);
 		};
-	}
+	} */
 }
 
