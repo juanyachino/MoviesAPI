@@ -31,7 +31,7 @@ public class CharacterController {
                                                  @RequestParam String story,
                                                  @RequestParam Integer age,
                                                  @RequestParam Integer weight,
-                                                 @RequestParam List<String> moviesTitles /*,
+                                                 @RequestParam(required = false) List<String> moviesTitles /*,
                                                  @RequestParam MultipartFile multipartImage*/) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
