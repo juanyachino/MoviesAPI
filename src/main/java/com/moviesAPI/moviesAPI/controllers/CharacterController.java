@@ -56,17 +56,21 @@ public class CharacterController {
     }
     @PostMapping(path="/edit")
     @Description("Edits any character's field. editing movies removes the previously saved movies!")
-    public @ResponseBody String editCharacter (@RequestParam String name,
+    public @ResponseBody String editCharacter (@RequestParam Long id,
+                                               @RequestParam(required = false) String name,
                                                  @RequestParam(required = false) String story,
                                                  @RequestParam(required = false) Integer age,
                                                  @RequestParam(required = false) Integer weight,
                                                  @RequestParam(required = false) List<String> moviesTitles /*,
                                                  @RequestParam(required = false) MultipartFile multipartImage*/) throws IOException {
-        List<Character> characters = characterRepository.findByName(name);
-        if (characters.isEmpty()) {
+        Optional<Character> characters = characterRepository.findById(id);
+        if (!characters.isPresent()) {
             return "Character doesn't exist!";
         }
-        Character character = characters.get(0);
+        Character character = characters.get();
+        if (name != null) {
+            character.setName(name);
+        }
         if (story != null) {
             character.setStory(story);
         }
@@ -91,27 +95,23 @@ public class CharacterController {
         return "Updated!";
     }
     @DeleteMapping(path="/delete")
-    public @ResponseBody String deleteCharacter(@RequestParam String name) {
-        List<Character> characters = characterRepository.findByName(name);
-        if (characters.isEmpty()) {
+    public @ResponseBody String deleteCharacter(@RequestParam Long id) {
+        Optional<Character> character = characterRepository.findById(id);
+        if (!character.isPresent()) {
             return "character not found";
         }
-        characterRepository.delete(characters.get(0));
+        characterRepository.delete(character.get());
         return "deleted!";
     }
     @GetMapping(path= "/detail")
-    public @ResponseBody Character getCharacterDetail(@RequestParam String name) {
-        List<Character> characters = characterRepository.findByName(name);
-        if (characters.isEmpty()) {
+    public @ResponseBody Character getCharacterDetail(@RequestParam Long id) {
+        Optional<Character> character = characterRepository.findById(id);
+        if (character.isPresent()) {
             return null;
         }
-        return characters.get(0);
+        return character.get();
     }
-    /*@GetMapping(path="/")
-    public @ResponseBody Iterable<Character> getAllCharacters() {
-        // This returns a JSON or XML with the characters
-        return characterRepository.findAll();
-    } */
+
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
     Object filterBy(@RequestParam(value = "age",required = false) Integer age,
