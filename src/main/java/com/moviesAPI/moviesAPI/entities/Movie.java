@@ -1,6 +1,7 @@
 package com.moviesAPI.moviesAPI.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
@@ -34,7 +35,7 @@ public class Movie {
     }
 
     @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonIgnoreProperties("movies")
     private Set<Character> characters = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)

@@ -1,6 +1,7 @@
 package com.moviesAPI.moviesAPI.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -34,7 +35,7 @@ public class Character {
             inverseJoinColumns = {
                     @JoinColumn(name = "movie_id", referencedColumnName = "id",
                             nullable = false, updatable = false)})
-    @JsonBackReference
+    @JsonIgnoreProperties("characters")
     Set<Movie> movies = new HashSet<>();
 
 
