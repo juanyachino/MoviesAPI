@@ -29,7 +29,7 @@ public class GenreController {
 
     @PostMapping(path="/add") // Map ONLY POST Requests
     public @ResponseBody
-    String addNewGenre (@RequestParam String name, @RequestParam List<Long> moviesIds /*,
+    String addNewGenre (@RequestParam String name, @RequestParam(required = false) List<Long> moviesIds /*,
                                                  @RequestParam MultipartFile multipartImage*/) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
@@ -38,16 +38,18 @@ public class GenreController {
         genre.setName(name);
         //genre.setImage(multipartImage.getBytes());
 
-        //only previously added movies will be added to genre
-        for(Long movieId : moviesIds){
-            Optional<Movie> movies = movieRepository.findById(movieId);
-            if (movies.isPresent()) {
-                Movie movie = movies.get();
-                genre.getMovies().add(movie);
-                movie.getGenres().add(genre);
+        if (moviesIds != null) {
+            //only previously added movies will be added to genre
+            for (Long movieId : moviesIds) {
+                Optional<Movie> movies = movieRepository.findById(movieId);
+                if (movies.isPresent()) {
+                    Movie movie = movies.get();
+                    genre.getMovies().add(movie);
+                    //movie.getGenres().add(genre);
+                    //movieRepository.save(movie);
+                }
             }
         }
-
         genreRepository.save(genre);
         return name + " Saved!";
     }

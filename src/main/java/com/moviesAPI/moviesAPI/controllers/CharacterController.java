@@ -42,12 +42,15 @@ public class CharacterController {
         character.setStory(story);
         character.setWeight(weight);
         //only previously added movies will be added to character
-        for(Long movieId : moviesIds){
-            Optional<Movie> movies = movieRepository.findById(movieId);
-            if (movies.isPresent()) {
-                Movie movie = movies.get();
-                character.getMovies().add(movie);
-                movie.getCharacters().add(character);
+        if (moviesIds != null) {
+            for (Long movieId : moviesIds) {
+                Optional<Movie> movies = movieRepository.findById(movieId);
+                if (movies.isPresent()) {
+                    Movie movie = movies.get();
+                    character.getMovies().add(movie);
+                    //movie.getCharacters().add(character);
+                    //movieRepository.save(movie);
+                }
             }
         }
        // character.setImage(multipartImage.getBytes());
@@ -88,6 +91,7 @@ public class CharacterController {
                     Movie movie = movies.get();
                     character.getMovies().add(movie);
                     movie.getCharacters().add(character);
+                    movieRepository.save(movie);
                 }
             }
         }
@@ -107,9 +111,9 @@ public class CharacterController {
     public @ResponseBody Character getCharacterDetail(@RequestParam Long id) {
         Optional<Character> character = characterRepository.findById(id);
         if (character.isPresent()) {
-            return null;
+            return character.get();
         }
-        return character.get();
+        return null;
     }
 
     @RequestMapping(method = RequestMethod.GET)

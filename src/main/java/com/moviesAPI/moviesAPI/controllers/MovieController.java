@@ -47,20 +47,27 @@ public class MovieController {
         //movie.setImage(multipartImage.getBytes());
 
         //only previously added characters will be added to movie
-        for(Long characterId : charactersIds){
-            Optional<Character> characters = characterRepository.findById(characterId);
-            if (characters.isPresent()) {
-                Character character = characters.get();
-                character.getMovies().add(movie);
-                movie.getCharacters().add(character);
+        if (charactersIds != null) {
+            for (Long characterId : charactersIds) {
+                Optional<Character> characters = characterRepository.findById(characterId);
+                if (characters.isPresent()) {
+                    Character character = characters.get();
+                    character.getMovies().add(movie);
+                    //movie.getCharacters().add(character);
+                    //characterRepository.save(character);
+                }
             }
         }
-        for(Long genreId : genresIds){
-            Optional<Genre> genres = genreRepository.findById(genreId);
-            if (genres.isPresent()) {
-                Genre genre = genres.get();
-                genre.getMovies().add(movie);
-                movie.getGenres().add(genre);
+        //only previously added genres will be added to movie
+        if (genresIds != null) {
+            for (Long genreId : genresIds) {
+                Optional<Genre> genres = genreRepository.findById(genreId);
+                if (genres.isPresent()) {
+                    Genre genre = genres.get();
+                    genre.getMovies().add(movie);
+                    //movie.getGenres().add(genre);
+                    //genreRepository.save(genre);
+                }
             }
         }
         movieRepository.save(movie);
@@ -69,17 +76,20 @@ public class MovieController {
 
     @PostMapping(path="/edit")
     @Description("Edits any movie's field. editing characters/genres removes the previously saved characters/genres!")
-    public @ResponseBody String editMovie (@RequestParam String title,
+    public @ResponseBody String editMovie (@RequestParam Long id, @RequestParam(required = false) String title,
                                                @RequestParam(required = false) String date,
                                                @RequestParam(required = false) Integer rating,
                                                @RequestParam(required = false) List<Long> charactersIds,
                                                @RequestParam(required = false) List<Long> genresIds/*,
                                                @RequestParam(required = false) MultipartFile multipartImage*/) throws IOException {
-        List<Movie> movies = movieRepository.findByTitle(title);
-        if (movies.isEmpty()) {
+        Optional<Movie> movies = movieRepository.findById(id);
+        if (!movies.isPresent()) {
             return "Movie doesn't exist!";
         }
-        Movie movie = movies.get(0);
+        Movie movie = movies.get();
+        if (title != null) {
+            movie.setTitle(title);
+        }
         if (date != null) {
             movie.setDate(date);
         }
@@ -95,6 +105,7 @@ public class MovieController {
                     Character character = characters.get();
                     character.getMovies().add(movie);
                     movie.getCharacters().add(character);
+                    characterRepository.save(character);
                 }
             }
         }
@@ -106,6 +117,7 @@ public class MovieController {
                     Genre genre = genres.get();
                     genre.getMovies().add(movie);
                     movie.getGenres().add(genre);
+                    genreRepository.save(genre);
                 }
             }
         }
@@ -124,12 +136,12 @@ public class MovieController {
     }
 
     @GetMapping(path= "/detail")
-    public @ResponseBody Movie getMovieDetail(@RequestParam String title) {
-        List<Movie> movies = movieRepository.findByTitle(title);
-        if (movies.isEmpty()) {
-            return null;
+    public @ResponseBody Movie getMovieDetail(@RequestParam Long id) {
+        Optional<Movie> movies = movieRepository.findById(id);
+        if (movies.isPresent()) {
+            return movies.get();
         }
-        return movies.get(0);
+        return null;
     }
 
     @RequestMapping(method = RequestMethod.GET)
