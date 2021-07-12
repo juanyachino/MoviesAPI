@@ -15,7 +15,7 @@ public class Genre {
     private Long id;
 
     @Lob
-    @Column(name = "image", columnDefinition="BLOB")
+    @Column(name = "image", columnDefinition="LONGBLOB")
     private byte[] image;
 
     private String name;

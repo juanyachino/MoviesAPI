@@ -1,6 +1,6 @@
 package com.moviesAPI.moviesAPI.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -17,7 +17,7 @@ public class Movie {
     private Long id;
 
     @Lob
-    @Column(name = "image", columnDefinition="BLOB")
+    @Column(name = "image", columnDefinition="LONGBLOB")
     private byte[] image;
 
     private String title;
