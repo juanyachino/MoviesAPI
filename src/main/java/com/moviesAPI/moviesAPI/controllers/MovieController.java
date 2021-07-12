@@ -35,8 +35,8 @@ public class MovieController {
                                                  @RequestParam String date,
                                                  @RequestParam Integer rating,
                                                  @RequestParam(required = false) List<Long> genresIds,
-                                                 @RequestParam(required = false) List<Long> charactersIds/*,
-                                                 @RequestParam MultipartFile multipartImage*/) throws IOException {
+                                                 @RequestParam(required = false) List<Long> charactersIds,
+                                                 @RequestParam MultipartFile multipartImage) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
@@ -44,7 +44,7 @@ public class MovieController {
         movie.setTitle(title);
         movie.setRating(rating);
         movie.setDate(date);
-        //movie.setImage(multipartImage.getBytes());
+        movie.setImage(multipartImage.getBytes());
 
         //only previously added characters will be added to movie
         if (charactersIds != null) {
@@ -80,8 +80,8 @@ public class MovieController {
                                                @RequestParam(required = false) String date,
                                                @RequestParam(required = false) Integer rating,
                                                @RequestParam(required = false) List<Long> charactersIds,
-                                               @RequestParam(required = false) List<Long> genresIds/*,
-                                               @RequestParam(required = false) MultipartFile multipartImage*/) throws IOException {
+                                               @RequestParam(required = false) List<Long> genresIds,
+                                               @RequestParam(required = false) MultipartFile multipartImage) throws IOException {
         Optional<Movie> movies = movieRepository.findById(id);
         if (!movies.isPresent()) {
             return "Movie doesn't exist!";
@@ -121,8 +121,11 @@ public class MovieController {
                 }
             }
         }
+        if (multipartImage != null) {
+            movie.setImage(multipartImage.getBytes());
+        }
         movieRepository.save(movie);
-        return title + " Updated!";
+        return movie.getTitle() + " Updated!";
     }
 
     @DeleteMapping(path="/delete")

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,14 +30,14 @@ public class GenreController {
 
     @PostMapping(path="/add") // Map ONLY POST Requests
     public @ResponseBody
-    String addNewGenre (@RequestParam String name, @RequestParam(required = false) List<Long> moviesIds /*,
-                                                 @RequestParam MultipartFile multipartImage*/) throws IOException {
+    String addNewGenre (@RequestParam String name, @RequestParam(required = false) List<Long> moviesIds ,
+                                                 @RequestParam MultipartFile multipartImage) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
         Genre genre = new Genre();
         genre.setName(name);
-        //genre.setImage(multipartImage.getBytes());
+        genre.setImage(multipartImage.getBytes());
 
         if (moviesIds != null) {
             //only previously added movies will be added to genre

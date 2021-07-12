@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Description;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
@@ -31,8 +32,8 @@ public class CharacterController {
                                                  @RequestParam String story,
                                                  @RequestParam Integer age,
                                                  @RequestParam Integer weight,
-                                                 @RequestParam(required = false) List<Long> moviesIds /*,
-                                                 @RequestParam MultipartFile multipartImage*/) throws IOException {
+                                                 @RequestParam(required = false) List<Long> moviesIds ,
+                                                 @RequestParam MultipartFile multipartImage) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
 
@@ -41,6 +42,7 @@ public class CharacterController {
         character.setAge(age);
         character.setStory(story);
         character.setWeight(weight);
+        character.setImage(multipartImage.getBytes());
         //only previously added movies will be added to character
         if (moviesIds != null) {
             for (Long movieId : moviesIds) {
@@ -53,7 +55,6 @@ public class CharacterController {
                 }
             }
         }
-       // character.setImage(multipartImage.getBytes());
         characterRepository.save(character);
         return "Saved";
     }
@@ -64,8 +65,8 @@ public class CharacterController {
                                                  @RequestParam(required = false) String story,
                                                  @RequestParam(required = false) Integer age,
                                                  @RequestParam(required = false) Integer weight,
-                                                 @RequestParam(required = false) List<Long> moviesIds /*,
-                                                 @RequestParam(required = false) MultipartFile multipartImage*/) throws IOException {
+                                                 @RequestParam(required = false) List<Long> moviesIds ,
+                                                 @RequestParam(required = false) MultipartFile multipartImage) throws IOException {
         Optional<Character> characters = characterRepository.findById(id);
         if (!characters.isPresent()) {
             return "Character doesn't exist!";
@@ -94,6 +95,9 @@ public class CharacterController {
                     movieRepository.save(movie);
                 }
             }
+        }
+        if (multipartImage != null) {
+            character.setImage(multipartImage.getBytes());
         }
         characterRepository.save(character);
         return "Updated!";
