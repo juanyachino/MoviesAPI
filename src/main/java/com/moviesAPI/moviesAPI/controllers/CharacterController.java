@@ -4,9 +4,6 @@ package com.moviesAPI.moviesAPI.controllers;
 
 
 import com.moviesAPI.moviesAPI.entities.Character;
-import com.moviesAPI.moviesAPI.entities.Movie;
-import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
-import com.moviesAPI.moviesAPI.repositories.MovieRepository;
 import com.moviesAPI.moviesAPI.services.CharacterServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
