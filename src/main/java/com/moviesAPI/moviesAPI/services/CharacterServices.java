@@ -62,6 +62,24 @@ public class CharacterServices {
         characterRepository.save(character);
         return true;
     }
+    public Object getFilteredCharacterList(Integer age, Integer weight, String name,Long movieId){
+        if (age != null) {
+            return characterRepository.findByAge(age);
+        }
+        if (name != null) {
+            return characterRepository.findByName(name);
+        }
+        if (weight != null) {
+            return characterRepository.findByWeight(weight);
+        }
+        if (movieId != null) {
+            Optional<Movie> movies = movieRepository.findById(movieId);
+            if (movies.isPresent()){
+                return movies.get().getCharacters();
+            }
+        }
+        return characterRepository.findBy(); //returns all characters in list view if no params were given
+    }
     private Character addMovies(Character character ,List<Long> moviesIds){
         for (Long movieId : moviesIds) {
             Optional<Movie> movies = movieRepository.findById(movieId);

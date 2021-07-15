@@ -92,21 +92,7 @@ public class CharacterController {
                     @RequestParam(value = "name",required = false) String name,
                     @RequestParam(value = "weight",required = false) Integer weight,
                     @RequestParam(value = "movieId",required = false) Long movieId) {
-        if (age != null) {
-            return characterRepository.findByAge(age);
-        }
-        if (name != null) {
-            return characterRepository.findByName(name);
-        }
-        if (weight != null) {
-            return characterRepository.findByWeight(weight);
-        }
-        if (movieId != null) {
-            Optional<Movie> movies = movieRepository.findById(movieId);
-            if (movies.isPresent()){
-                return movies.get().getCharacters();
-            }
-        }
-        return characterRepository.findBy(); //returns all characters in list view if no params were given
+
+        return characterServices.getFilteredCharacterList(age, weight, name, movieId);
     }
 }
