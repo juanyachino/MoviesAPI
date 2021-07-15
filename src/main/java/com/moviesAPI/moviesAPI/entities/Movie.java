@@ -1,11 +1,13 @@
 package com.moviesAPI.moviesAPI.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -25,6 +27,14 @@ public class Movie {
     private String date;
 
     private Integer rating;
+
+    public Movie(){}
+    public Movie(byte[] bytes, String title, String date, Integer rating) {
+        this.image = bytes;
+        this.title = title;
+        this.date = date;
+        this.rating = rating;
+    }
 
     public void setCharacters(Set<Character> characters) {
         this.characters = characters;
