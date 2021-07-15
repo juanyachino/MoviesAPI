@@ -80,6 +80,21 @@ public class CharacterServices {
         }
         return characterRepository.findBy(); //returns all characters in list view if no params were given
     }
+    public boolean deleteCharacter (Long id) {
+        Optional<Character> character = characterRepository.findById(id);
+        if (!character.isPresent()) {
+            return false;
+        }
+        characterRepository.delete(character.get());
+        return true;
+    }
+    public Character getCharacterDetails(Long id) {
+        Optional<Character> character = characterRepository.findById(id);
+        if (character.isPresent()) {
+            return character.get();
+        }
+        return null;
+    }
     private Character addMovies(Character character ,List<Long> moviesIds){
         for (Long movieId : moviesIds) {
             Optional<Movie> movies = movieRepository.findById(movieId);
