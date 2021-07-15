@@ -37,6 +37,14 @@ public class Character {
                             nullable = false, updatable = false)})
     @JsonIgnoreProperties("characters")
     Set<Movie> movies = new HashSet<>();
+    public Character(){ }
+    public Character(byte[] image, String name, Integer age, Integer weight, String story) {
+        this.image = image;
+        this.name = name;
+        this.age = age;
+        this.weight = weight;
+        this.story = story;
+    }
 
 
     public long getId() {

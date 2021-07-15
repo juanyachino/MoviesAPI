@@ -7,8 +7,11 @@ import com.moviesAPI.moviesAPI.entities.Character;
 import com.moviesAPI.moviesAPI.entities.Movie;
 import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
+import com.moviesAPI.moviesAPI.services.CharacterServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,8 @@ public class CharacterController {
     private CharacterRepository characterRepository;
     @Autowired
     private MovieRepository movieRepository;
+    @Autowired
+    private CharacterServices characterServices;
 
     @PostMapping(path="/add") // Map ONLY POST Requests
     public @ResponseBody String addNewCharacter (@RequestParam String name,
@@ -34,73 +39,29 @@ public class CharacterController {
                                                  @RequestParam Integer weight,
                                                  @RequestParam(required = false) List<Long> moviesIds ,
                                                  @RequestParam MultipartFile multipartImage) throws IOException {
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
 
-        Character character = new Character();
-        character.setName(name);
-        character.setAge(age);
-        character.setStory(story);
-        character.setWeight(weight);
-        character.setImage(multipartImage.getBytes());
-        //only previously added movies will be added to character
-        if (moviesIds != null) {
-            for (Long movieId : moviesIds) {
-                Optional<Movie> movies = movieRepository.findById(movieId);
-                if (movies.isPresent()) {
-                    Movie movie = movies.get();
-                    character.getMovies().add(movie);
-                    //movie.getCharacters().add(character);
-                    //movieRepository.save(movie);
-                }
-            }
-        }
-        characterRepository.save(character);
+        characterServices.createCharacter(name,story,age,weight,moviesIds,multipartImage);
         return "Saved";
     }
     @PostMapping(path="/edit")
     @Description("Edits any character's field. editing movies removes the previously saved movies!")
-    public @ResponseBody String editCharacter (@RequestParam Long id,
+    public @ResponseBody ResponseEntity<String> editCharacter (@RequestParam Long id,
                                                @RequestParam(required = false) String name,
                                                  @RequestParam(required = false) String story,
                                                  @RequestParam(required = false) Integer age,
                                                  @RequestParam(required = false) Integer weight,
                                                  @RequestParam(required = false) List<Long> moviesIds ,
                                                  @RequestParam(required = false) MultipartFile multipartImage) throws IOException {
-        Optional<Character> characters = characterRepository.findById(id);
-        if (!characters.isPresent()) {
-            return "Character doesn't exist!";
+
+        if (characterServices.editCharacter(id, name, story, age, weight, moviesIds, multipartImage)) {
+            return new ResponseEntity<>(
+                    "Character updated successfully",
+                    HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(
+                    "Character doesn't exist",
+                    HttpStatus.BAD_REQUEST);
         }
-        Character character = characters.get();
-        if (name != null) {
-            character.setName(name);
-        }
-        if (story != null) {
-            character.setStory(story);
-        }
-        if (age != null) {
-            character.setAge(age);
-        }
-        if (weight != null) {
-            character.setWeight(weight);
-        }
-        if (moviesIds != null) {
-            character.setMovies(new HashSet<>());  //removes previously added movies!
-            for(Long movieId : moviesIds){
-                Optional<Movie> movies = movieRepository.findById(movieId);
-                if (movies.isPresent()) {
-                    Movie movie = movies.get();
-                    character.getMovies().add(movie);
-                    movie.getCharacters().add(character);
-                    movieRepository.save(movie);
-                }
-            }
-        }
-        if (multipartImage != null) {
-            character.setImage(multipartImage.getBytes());
-        }
-        characterRepository.save(character);
-        return "Updated!";
     }
     @DeleteMapping(path="/delete")
     public @ResponseBody String deleteCharacter(@RequestParam Long id) {
@@ -112,12 +73,17 @@ public class CharacterController {
         return "deleted!";
     }
     @GetMapping(path= "/detail")
-    public @ResponseBody Character getCharacterDetail(@RequestParam Long id) {
+    public @ResponseBody
+    ResponseEntity getCharacterDetail(@RequestParam Long id) {
         Optional<Character> character = characterRepository.findById(id);
         if (character.isPresent()) {
-            return character.get();
+            return new ResponseEntity<>(
+                    character.get(),
+                    HttpStatus.OK);
         }
-        return null;
+        return new ResponseEntity<>(
+                "Character doesn't exist",
+                HttpStatus.BAD_REQUEST);
     }
 
     @RequestMapping(method = RequestMethod.GET)
