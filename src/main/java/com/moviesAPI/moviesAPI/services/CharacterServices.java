@@ -1,8 +1,10 @@
 package com.moviesAPI.moviesAPI.services;
 
 import com.moviesAPI.moviesAPI.entities.Character;
+import com.moviesAPI.moviesAPI.entities.Genre;
 import com.moviesAPI.moviesAPI.entities.Movie;
 import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
+import com.moviesAPI.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ public class CharacterServices {
     private CharacterRepository characterRepository;
     @Autowired
     private MovieRepository movieRepository;
+    @Autowired
+    private GenreRepository genreRepository;
 
     public void createCharacter (String name, String story, Integer age, Integer weight,
                                  List<Long> moviesIds, MultipartFile multipartImage) throws IOException {
@@ -71,10 +75,9 @@ public class CharacterServices {
             return characterRepository.findByWeight(weight);
         }
         if (movieId != null) {
-            Optional<Movie> movies = movieRepository.findById(movieId);
-            if (movies.isPresent()){
-                return movies.get().getCharacters();
-            }
+            Optional<Movie> moviesFound = movieRepository.findById(movieId);
+            return moviesFound.<Object>map(Movie::getCharacters).orElse(null);
+
         }
         return characterRepository.findBy(); //returns all characters in list view if no params were given
     }
@@ -88,10 +91,7 @@ public class CharacterServices {
     }
     public Character getCharacterDetails(Long id) {
         Optional<Character> character = characterRepository.findById(id);
-        if (character.isPresent()) {
-            return character.get();
-        }
-        return null;
+        return character.orElse(null);
     }
     private Character addMovies(Character character ,List<Long> moviesIds){
         for (Long movieId : moviesIds) {
