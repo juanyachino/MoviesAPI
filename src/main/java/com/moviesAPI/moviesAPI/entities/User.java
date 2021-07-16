@@ -18,13 +18,10 @@ public class User  {
     private String password;
     @Column(nullable = false, unique = true)
     private String email;
-
+    @Transient //doesn't persist the token
     private String token;
 
-
-
     public User(){}
-
 
     public Long getId() {
         return id;
