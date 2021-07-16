@@ -1,6 +1,7 @@
 package com.moviesAPI.moviesAPI.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -30,6 +31,11 @@ public class Genre {
                             nullable = false, updatable = false)})
     @JsonBackReference
     Set<Movie> movies = new HashSet<>();
+
+    public Genre(String name, byte[] bytes) {
+        this.name = name;
+        this.image = bytes;
+    }
 
     public Long getId() {
         return id;
