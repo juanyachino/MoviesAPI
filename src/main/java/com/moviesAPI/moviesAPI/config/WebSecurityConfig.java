@@ -1,6 +1,8 @@
 package com.moviesAPI.moviesAPI.config;
 
 import com.moviesAPI.moviesAPI.security.JWTAuthorizationFilter;
+import com.moviesAPI.moviesAPI.services.SendGridEmailService;
+import com.sendgrid.SendGrid;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    private final String SENDGRID_API_KEY = System.getenv("SENDGRID_API_KEY");
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
@@ -26,4 +29,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
+    @Bean
+    public SendGrid sendGrid(){
+        return new SendGrid(SENDGRID_API_KEY);
+    }
+
+
 }
