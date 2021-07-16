@@ -61,7 +61,7 @@ public class CharacterServices {
         characterRepository.save(character);
         return true;
     }
-    public Object getFilteredCharacterList(Integer age, Integer weight, String name,Long movieId){
+    public Iterable getFilteredCharacterList(Integer age, Integer weight, String name,Long movieId){
         if (age != null) {
             return characterRepository.findByAge(age);
         }
@@ -73,7 +73,7 @@ public class CharacterServices {
         }
         if (movieId != null) {
             Optional<Movie> moviesFound = movieRepository.findById(movieId);
-            return moviesFound.<Object>map(Movie::getCharacters).orElse(null);
+            return moviesFound.<Iterable>map(Movie::getCharacters).orElse(null);
 
         }
         return characterRepository.findBy(); //returns all characters in list view if no params were given

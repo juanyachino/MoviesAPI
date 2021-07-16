@@ -9,6 +9,6 @@ import java.util.List;
 // CRUD refers Create, Read, Update, Delete
 
 public interface GenreRepository extends CrudRepository<Genre, Long> {
-    List<Genre> findByName(String name);
+    Iterable<Genre> findByName(String name);
 
 }

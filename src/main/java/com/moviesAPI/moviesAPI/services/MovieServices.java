@@ -70,7 +70,7 @@ public class MovieServices {
         movieRepository.save(movie);
         return true;
     }
-    public Object getFilteredMoviesList(Long genreId, String title,String orderBy){
+    public Iterable getFilteredMoviesList(Long genreId, String title,String orderBy){
         if (title != null) {
             return movieRepository.findByTitle(title);
         }
@@ -80,7 +80,7 @@ public class MovieServices {
         }
         if (genreId != null) {
             Optional<Genre> genresFound = genreRepository.findById(genreId);
-            return genresFound.<Object>map(Genre::getMovies).orElse(null);
+            return genresFound.<Iterable>map(Genre::getMovies).orElse(null);
         }
         return movieRepository.findBy(); //returns all movies in list view if no params were given
     }

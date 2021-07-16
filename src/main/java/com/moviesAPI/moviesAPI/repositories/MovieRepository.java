@@ -9,10 +9,10 @@ import java.util.List;
 // CRUD refers Create, Read, Update, Delete
 
 public interface MovieRepository extends CrudRepository<Movie, Long> {
-    List<Movie> findByTitle(String title);
+    Iterable<Movie> findByTitle(String title);
 
-    List<Movie> findByOrderByDateAsc();
-    List<Movie> findByOrderByDateDesc();
+    Iterable<Movie> findByOrderByDateAsc();
+    Iterable<Movie> findByOrderByDateDesc();
     Iterable<MoviesListView> findBy();
 
 

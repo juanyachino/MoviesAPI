@@ -11,7 +11,7 @@ import java.util.List;
 // CRUD refers Create, Read, Update, Delete
 
 public interface CharacterRepository extends CrudRepository<Character, Long> {
-    List<Character> findByName(String name);
+    Iterable<Character> findByName(String name);
 
     Iterable<Character> findByAge(Integer age);
 
