@@ -1,10 +1,8 @@
 package com.moviesAPI.moviesAPI.services;
 
 import com.moviesAPI.moviesAPI.entities.Character;
-import com.moviesAPI.moviesAPI.entities.Genre;
 import com.moviesAPI.moviesAPI.entities.Movie;
 import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
-import com.moviesAPI.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +20,7 @@ public class CharacterServices {
     private CharacterRepository characterRepository;
     @Autowired
     private MovieRepository movieRepository;
-    @Autowired
-    private GenreRepository genreRepository;
+
 
     public void createCharacter (String name, String story, Integer age, Integer weight,
                                  List<Long> moviesIds, MultipartFile multipartImage) throws IOException {

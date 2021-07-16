@@ -7,7 +7,6 @@ import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
