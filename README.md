@@ -22,9 +22,30 @@ https://spring.io/guides/gs/accessing-data-mysql/
 > mysql> grant all on movies.* to 'springuser'@'%'; -- Gives all privileges to the new user on the newly created database
 > 
 # Many-to-many implementation
-https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
+> https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
+>
+> https://www.baeldung.com/jpa-many-to-man
 
-https://www.baeldung.com/jpa-many-to-man
+ # Storing image files on DB:
+ > https://www.baeldung.com/java-db-storing-files
+> 
+> # Send files in a post request with Postman: 
+> - When creating/editing a character/genre/movie:
+> - go to Body tab -> form-data
+ > - enter key : multipartImage 
+> - choose file from the dropdown
+ > - choose any file under the Value column.
 
- # Storing image files on DB
- https://www.baeldung.com/java-db-storing-files
+# Spring security: logging in and obtaining the JSON web token:
+> - register an acoount :
+> 
+> - Log in
+> 
+> - Copy the bearer token from the response body.
+> 
+> - Paste it under Authorization tab -> Bearer token on your next requests.
+
+# Send emails with SendGrid setup:
+> https://dzone.com/articles/integrate-sendgrid-with-a-spring-boot-and-java-app
+>
+> https://app.sendgrid.com/guide/integrate/langs/java
