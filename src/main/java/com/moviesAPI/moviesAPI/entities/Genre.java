@@ -32,6 +32,7 @@ public class Genre {
     @JsonBackReference
     Set<Movie> movies = new HashSet<>();
 
+    public Genre(){}
     public Genre(String name, byte[] bytes) {
         this.name = name;
         this.image = bytes;
