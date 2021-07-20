@@ -38,7 +38,7 @@ public class UserServices {
         String token = getJWTToken(username);
         user.setToken(token);
         userRepository.save(user);
-        return "Successfully logged in! token-> "+ token;
+        return token;
     }
     public String register(String username, String password, String email)
             throws InvalidUsernameException, InvalidPasswordException, UsernameAlreadyTakenException,

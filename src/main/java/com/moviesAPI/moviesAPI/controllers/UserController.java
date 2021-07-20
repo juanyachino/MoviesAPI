@@ -25,8 +25,10 @@ public class UserController {
     @Autowired
     private UserServices userServices;
     @PostMapping("/login")
-    public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
-        return userServices.login(username,password);
+    public ResponseEntity<String> login(@RequestParam("username") String username, @RequestParam("password") String password) {
+        return new ResponseEntity<>(
+                userServices.login(username,password),
+                HttpStatus.OK);
     }
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestParam("username") String username, @RequestParam("password") String password,
