@@ -3,6 +3,8 @@ package com.moviesAPI.moviesAPI.services;
 import com.moviesAPI.moviesAPI.entities.Character;
 import com.moviesAPI.moviesAPI.entities.Genre;
 import com.moviesAPI.moviesAPI.entities.Movie;
+import com.moviesAPI.moviesAPI.exceptions.InvalidReleaseYearException;
+import com.moviesAPI.moviesAPI.exceptions.InvalidMovieRatingException;
 import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
@@ -25,10 +27,16 @@ public class MovieServices {
     @Autowired
     private GenreRepository genreRepository;
 
-    public void createMovie (String title, String date, Integer rating, List<Long> genresIds,
-                             List<Long> charactersIds, MultipartFile multipartImage) throws IOException {
-
-        Movie movie = new Movie(multipartImage.getBytes(), title,date,rating);
+    public void createMovie (String title, Integer releaseYear, Integer rating, List<Long> genresIds,
+                             List<Long> charactersIds, MultipartFile multipartImage)
+            throws IOException, InvalidReleaseYearException, InvalidMovieRatingException {
+        if (releaseYear <= 1900) {
+            throw new InvalidReleaseYearException("Movie release year can't be prior to 1900");
+        }
+        if (rating < 1 || rating > 5) {
+            throw new InvalidMovieRatingException("Movie rating has to be a value between 1 and 5");
+        }
+        Movie movie = new Movie(multipartImage.getBytes(), title,releaseYear,rating);
         if (charactersIds != null) {
             addCharacters(movie,charactersIds);
         }
@@ -38,10 +46,12 @@ public class MovieServices {
         }
         movieRepository.save(movie);
     }
-    public boolean editMovie (Long id,String title, String date, Integer rating,List<Long> charactersIds,
+    public boolean editMovie (Long id,String title, Integer releaseYear, Integer rating,List<Long> charactersIds,
                               List<Long> genresIds,
-                              MultipartFile multipartImage) throws IOException {
+                              MultipartFile multipartImage) throws IOException, InvalidReleaseYearException, InvalidMovieRatingException {
         Optional<Movie> movies = movieRepository.findById(id);
+
+
         if (!movies.isPresent()) {
             return false;
         }
@@ -49,10 +59,16 @@ public class MovieServices {
         if (title != null) {
             movie.setTitle(title);
         }
-        if (date != null) {
-            movie.setDate(date);
+        if (releaseYear != null) {
+            if (releaseYear <= 1900) {
+                throw new InvalidReleaseYearException("Movie release year can't be prior to 1900");
+            }
+            movie.setReleaseYear(releaseYear);
         }
         if (rating != null) {
+            if (rating < 1 || rating > 5) {
+                throw new InvalidMovieRatingException("Movie rating has to be a value between 1 and 5");
+            }
             movie.setRating(rating);
         }
 
@@ -75,8 +91,8 @@ public class MovieServices {
             return movieRepository.findByTitle(title);
         }
         if (orderBy != null) {
-            return "ASC".equals(orderBy) ? movieRepository.findByOrderByDateAsc() :
-                    movieRepository.findByOrderByDateDesc();
+            return "ASC".equals(orderBy) ? movieRepository.findByOrderByReleaseYearAsc() :
+                    movieRepository.findByOrderByReleaseYearDesc();
         }
         if (genreId != null) {
             Optional<Genre> genresFound = genreRepository.findById(genreId);

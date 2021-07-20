@@ -22,15 +22,15 @@ public class Movie {
 
     private String title;
 
-    private String date;
+    private Integer releaseYear;
 
     private Integer rating;
 
     public Movie(){}
-    public Movie(byte[] bytes, String title, String date, Integer rating) {
+    public Movie(byte[] bytes, String title, Integer releaseYear, Integer rating) {
         this.image = bytes;
         this.title = title;
-        this.date = date;
+        this.releaseYear = releaseYear;
         this.rating = rating;
     }
 
@@ -72,11 +72,11 @@ public class Movie {
     }
 
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setReleaseYear(Integer releaseYear) {
+        this.releaseYear = releaseYear;
     }
-    public String getDate() {
-        return date;
+    public Integer getReleaseYear() {
+        return releaseYear;
     }
 
     public Integer getRating() {

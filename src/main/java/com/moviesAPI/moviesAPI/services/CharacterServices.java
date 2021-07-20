@@ -2,6 +2,8 @@ package com.moviesAPI.moviesAPI.services;
 
 import com.moviesAPI.moviesAPI.entities.Character;
 import com.moviesAPI.moviesAPI.entities.Movie;
+import com.moviesAPI.moviesAPI.exceptions.InvalidAgeException;
+import com.moviesAPI.moviesAPI.exceptions.InvalidWeightException;
 import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +25,14 @@ public class CharacterServices {
 
 
     public void createCharacter (String name, String story, Integer age, Integer weight,
-                                 List<Long> moviesIds, MultipartFile multipartImage) throws IOException {
-
+                                 List<Long> moviesIds, MultipartFile multipartImage) throws
+            IOException, InvalidAgeException, InvalidWeightException {
+        if (age <= 0 )  {
+            throw new InvalidAgeException("Age can not be a negative number!");
+        }
+        if (weight < 0) {
+            throw new InvalidWeightException("Weight can not be a negative number!");
+        }
         Character character = new Character(multipartImage.getBytes(), name,age,weight,story);
         //only previously added movies will be added to character
         if (moviesIds != null) {
@@ -33,8 +41,10 @@ public class CharacterServices {
         characterRepository.save(character);
     }
     public boolean editCharacter (Long id,String name, String story, Integer age, Integer weight,
-                               List<Long> moviesIds, MultipartFile multipartImage) throws IOException {
+                               List<Long> moviesIds, MultipartFile multipartImage) throws IOException, InvalidAgeException, InvalidWeightException {
         Optional<Character> characters = characterRepository.findById(id);
+
+
         if (!characters.isPresent()) {
             return false;
         }
@@ -46,9 +56,15 @@ public class CharacterServices {
             character.setStory(story);
         }
         if (age != null) {
+            if (age <= 0 )  {
+                throw new InvalidAgeException("Age can not be a negative number!");
+            }
             character.setAge(age);
         }
         if (weight != null) {
+            if (weight < 0) {
+                throw new InvalidWeightException("Weight can not be a negative number!");
+            }
             character.setWeight(weight);
         }
         if (moviesIds != null) {

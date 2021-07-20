@@ -11,8 +11,8 @@ import java.util.List;
 public interface MovieRepository extends CrudRepository<Movie, Long> {
     Iterable<Movie> findByTitle(String title);
 
-    Iterable<Movie> findByOrderByDateAsc();
-    Iterable<Movie> findByOrderByDateDesc();
+    Iterable<Movie> findByOrderByReleaseYearAsc();
+    Iterable<Movie> findByOrderByReleaseYearDesc();
     Iterable<MoviesListView> findBy();
 
 
@@ -20,6 +20,6 @@ public interface MovieRepository extends CrudRepository<Movie, Long> {
 
         byte[] getImage();
         String getTitle();
-        String getDate();
+        String getReleaseYear();
     }
 }

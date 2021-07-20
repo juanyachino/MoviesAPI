@@ -3,6 +3,8 @@ package com.moviesAPI.moviesAPI.controllers;
 
 
 import com.moviesAPI.moviesAPI.entities.Movie;
+import com.moviesAPI.moviesAPI.exceptions.InvalidReleaseYearException;
+import com.moviesAPI.moviesAPI.exceptions.InvalidMovieRatingException;
 import com.moviesAPI.moviesAPI.services.MovieServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -26,33 +28,60 @@ public class MovieController {
     private MovieServices movieServices;
 
     @PostMapping(path="/add") // Map ONLY POST Requests
-    public @ResponseBody String addNewMovie (@RequestParam String title,
-                                                 @RequestParam String date,
+    public @ResponseBody ResponseEntity<String> addNewMovie (@RequestParam String title,
+                                                 @RequestParam Integer releaseYear,
                                                  @RequestParam Integer rating,
                                                  @RequestParam(required = false) List<Long> genresIds,
                                                  @RequestParam(required = false) List<Long> charactersIds,
                                                  @RequestParam MultipartFile multipartImage) throws IOException {
         // @ResponseBody means the returned String is the response, not a view name
         // @RequestParam means it is a parameter from the GET or POST request
-        movieServices.createMovie(title, date, rating, genresIds, charactersIds, multipartImage);
-        return title +" Saved";
+        try {
+            movieServices.createMovie(title, releaseYear, rating, genresIds, charactersIds, multipartImage);
+        } catch (InvalidReleaseYearException e) {
+            e.printStackTrace();
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Movie release year can't be prior to 1900!",
+                    HttpStatus.BAD_REQUEST);
+        } catch (InvalidMovieRatingException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Movie rating has to be between 1 and 5",
+                    HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(
+                "Movie  "+ title +" created successfully",
+                HttpStatus.OK);
     }
 
     @PostMapping(path="/edit")
     @Description("Edits any movie's field. editing characters/genres removes the previously saved characters/genres!")
     public @ResponseBody ResponseEntity<String> editMovie (@RequestParam Long id, @RequestParam(required = false) String title,
-                                               @RequestParam(required = false) String date,
+                                               @RequestParam(required = false) Integer releaseYear,
                                                @RequestParam(required = false) Integer rating,
                                                @RequestParam(required = false) List<Long> charactersIds,
                                                @RequestParam(required = false) List<Long> genresIds,
                                                @RequestParam(required = false) MultipartFile multipartImage) throws IOException {
-        return movieServices.editMovie(id, title, date, rating, charactersIds, genresIds, multipartImage)?
-                new ResponseEntity<>(
-                        "Movie with Id: "+ id +" updated successfully",
-                        HttpStatus.OK) :
-                new ResponseEntity<>(
-                        "Movie with Id: "+ id +"doesn't exist",
-                        HttpStatus.BAD_REQUEST);
+        try {
+            return movieServices.editMovie(id, title, releaseYear, rating, charactersIds, genresIds, multipartImage)?
+                    new ResponseEntity<>(
+                            "Movie with Id: "+ id +" updated successfully",
+                            HttpStatus.OK) :
+                    new ResponseEntity<>(
+                            "Movie with Id: "+ id +"doesn't exist",
+                            HttpStatus.BAD_REQUEST);
+        } catch (InvalidReleaseYearException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Movie release year can't be prior to 1900!",
+                    HttpStatus.BAD_REQUEST);
+        } catch (InvalidMovieRatingException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Movie rating has to be between 1 and 5",
+                    HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping(path="/delete")

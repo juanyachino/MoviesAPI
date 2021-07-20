@@ -4,6 +4,8 @@ package com.moviesAPI.moviesAPI.controllers;
 
 
 import com.moviesAPI.moviesAPI.entities.Character;
+import com.moviesAPI.moviesAPI.exceptions.InvalidAgeException;
+import com.moviesAPI.moviesAPI.exceptions.InvalidWeightException;
 import com.moviesAPI.moviesAPI.services.CharacterServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -25,15 +27,29 @@ public class CharacterController {
     private CharacterServices characterServices;
 
     @PostMapping(path="/add") // Map ONLY POST Requests
-    public @ResponseBody String addNewCharacter (@RequestParam String name,
+    public @ResponseBody ResponseEntity<String> addNewCharacter (@RequestParam String name,
                                                  @RequestParam String story,
                                                  @RequestParam Integer age,
                                                  @RequestParam Integer weight,
                                                  @RequestParam(required = false) List<Long> moviesIds ,
                                                  @RequestParam MultipartFile multipartImage) throws IOException {
 
-        characterServices.createCharacter(name,story,age,weight,moviesIds,multipartImage);
-        return "Saved";
+        try {
+            characterServices.createCharacter(name,story,age,weight,moviesIds,multipartImage);
+        } catch (InvalidAgeException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Character's age is invalid!",
+                    HttpStatus.BAD_REQUEST);
+        } catch (InvalidWeightException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Character's weight is invalid!",
+                    HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(
+                "Character created successfully!",
+                HttpStatus.OK);
     }
     @PostMapping(path="/edit")
     @Description("Edits any character's field. editing movies removes the previously saved movies!")
@@ -45,13 +61,24 @@ public class CharacterController {
                                                  @RequestParam(required = false) List<Long> moviesIds ,
                                                  @RequestParam(required = false) MultipartFile multipartImage) throws IOException {
 
-        return characterServices.editCharacter(id, name, story, age, weight, moviesIds, multipartImage) ?
-                new ResponseEntity<>(
-                        "Character updated successfully",
-                        HttpStatus.OK) :
-                new ResponseEntity<>(
-                        "Character doesn't exist",
-                        HttpStatus.BAD_REQUEST);
+        try {
+            return characterServices.editCharacter(id, name, story, age, weight, moviesIds, multipartImage) ?
+                    new ResponseEntity<>(
+                            "Character updated successfully",
+                            HttpStatus.OK) :
+                    new ResponseEntity<>(
+                            "Character doesn't exist",
+                            HttpStatus.BAD_REQUEST);
+        } catch (InvalidAgeException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Character's age is invalid!",
+                    HttpStatus.BAD_REQUEST);
+        } catch (InvalidWeightException e) {
+            return new ResponseEntity<>(
+                    "Character's weight is invalid!",
+                    HttpStatus.BAD_REQUEST);
+        }
     }
     @DeleteMapping(path="/delete")
     public @ResponseBody String deleteCharacter(@RequestParam Long id) {
@@ -72,7 +99,7 @@ public class CharacterController {
 
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
-    Object filterBy(@RequestParam(value = "age",required = false) Integer age,
+    Iterable filterBy(@RequestParam(value = "age",required = false) Integer age,
                     @RequestParam(value = "name",required = false) String name,
                     @RequestParam(value = "weight",required = false) Integer weight,
                     @RequestParam(value = "movieId",required = false) Long movieId) {
