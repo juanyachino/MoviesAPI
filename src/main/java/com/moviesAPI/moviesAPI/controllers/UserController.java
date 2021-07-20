@@ -2,10 +2,16 @@ package com.moviesAPI.moviesAPI.controllers;
 
 
 
+import com.moviesAPI.moviesAPI.exceptions.EmailAlreadyExistsException;
+import com.moviesAPI.moviesAPI.exceptions.InvalidPasswordException;
+import com.moviesAPI.moviesAPI.exceptions.InvalidUsernameException;
+import com.moviesAPI.moviesAPI.exceptions.UsernameAlreadyTakenException;
 import com.moviesAPI.moviesAPI.repositories.UserRepository;
 import com.moviesAPI.moviesAPI.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -23,8 +29,32 @@ public class UserController {
         return userServices.login(username,password);
     }
     @PostMapping("/register")
-    public String register(@RequestParam("username") String username, @RequestParam("password") String password,
+    public ResponseEntity<String> register(@RequestParam("username") String username, @RequestParam("password") String password,
                                    @RequestParam("email") String email) {
-        return userServices.register(username,password,email);
+        try {
+            return new ResponseEntity<>(
+                    userServices.register(username,password,email),
+                    HttpStatus.OK);
+        } catch (InvalidUsernameException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Username must be at least 5 characters long!",
+                    HttpStatus.BAD_REQUEST);
+        } catch (InvalidPasswordException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Password must be at least 5 characters long!",
+                    HttpStatus.BAD_REQUEST);
+        } catch (EmailAlreadyExistsException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Email already exists on database",
+                    HttpStatus.BAD_REQUEST);
+        } catch (UsernameAlreadyTakenException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "username already taken!",
+                    HttpStatus.BAD_REQUEST);
+        }
     }
 }
