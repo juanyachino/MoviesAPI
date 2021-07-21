@@ -36,8 +36,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestPropertySource(properties="spring.jpa.hibernate.ddl-auto=create-drop") // clears the database after every test run
+@TestPropertySource(properties="spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/movies_dev") // uses a different database
 public class MoviesApiIntegrationTests {
-
     private static final String TESTUSERNAME = "test1";
     private static final String TESTPASSWORD = "test123";
     private static final String TESTEMAIL = "test@email.com";
