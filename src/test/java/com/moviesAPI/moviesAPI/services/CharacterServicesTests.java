@@ -6,6 +6,7 @@ import com.moviesAPI.moviesAPI.exceptions.InvalidAgeException;
 import com.moviesAPI.moviesAPI.exceptions.InvalidWeightException;
 import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.moviesAPI.repositories.MovieRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,7 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 
-import static org.junit.Assert.*;
+
 import static org.mockito.Mockito.when;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -45,22 +46,22 @@ public class CharacterServicesTests {
         characterServices.createCharacter("TEST", "test", 123, 65,
                 new ArrayList<>(),image);
         when(characterRepository.count()).thenReturn(Long.valueOf(1));
-        assertEquals(precount + 1 , characterRepository.count() );
+        Assertions.assertEquals(precount + 1 , characterRepository.count() );
 
     }
     @Test
     public void editCharacterWorks() throws IOException, InvalidAgeException, InvalidWeightException {
-        when(characterRepository.findById(Long.valueOf(1))).thenReturn(
+        when(characterRepository.findById(1L)).thenReturn(
                 java.util.Optional.of(new Character(image.getBytes(), "String name", 30, 65, "String story")));
 
-        characterServices.editCharacter(Long.valueOf(1),"newName","new story",40,55,new ArrayList<>(),image);
-        Character character = characterRepository.findById(Long.valueOf(1)).get();
+        characterServices.editCharacter(1L,"newName","new story",40,55,new ArrayList<>(),image);
+        Character character = characterRepository.findById(1L).get();
 
-        assertEquals(character.getName() ,"newName");
-        assertEquals(character.getStory() ,"new story");
-        assertEquals(character.getAge() ,Integer.valueOf(40));
-        assertEquals(character.getWeight() ,Integer.valueOf(55));
-        assertEquals(character.getImage() ,image.getBytes());
+        Assertions.assertEquals(character.getName() ,"newName");
+        Assertions.assertEquals(character.getStory() ,"new story");
+        Assertions.assertEquals(character.getAge() ,Integer.valueOf(40));
+        Assertions.assertEquals(character.getWeight() ,Integer.valueOf(55));
+        Assertions.assertEquals(character.getImage() ,image.getBytes());
 
 
 
@@ -69,40 +70,40 @@ public class CharacterServicesTests {
     public void getFilteredListReturnsCorrectValues() throws IOException {
         when(characterRepository.findByAge(45)).thenReturn(
                 Collections.singleton(new Character(image.getBytes(), "String name", 45, 65, "String story")));
-        assertEquals(characterServices.getFilteredCharacterList(
+        Assertions.assertEquals(characterServices.getFilteredCharacterList(
                 45,null,null,null).spliterator().getExactSizeIfKnown(), 1);
 
         when(characterRepository.findByWeight(65)).thenReturn(
                 Collections.singleton(new Character(image.getBytes(), "name", 45, 65, "story")));
-        assertEquals(characterServices.getFilteredCharacterList(
+        Assertions.assertEquals(characterServices.getFilteredCharacterList(
                 null,65,null,null).spliterator().getExactSizeIfKnown(), 1);
 
         when(characterRepository.findByName("name")).thenReturn(
                 Collections.singleton(new Character(image.getBytes(), "name", 45, 65, "story")));
-        assertEquals(characterServices.getFilteredCharacterList(
+        Assertions.assertEquals(characterServices.getFilteredCharacterList(
                 null,null,"name",null).spliterator().getExactSizeIfKnown(), 1);
 
         Movie mockMovie = org.mockito.Mockito.mock(Movie.class);
         //Movie movie = new Movie(image.getBytes(), "title", "date", 5);
-        when(movieRepository.findById(Long.valueOf(1))).thenReturn(
+        when(movieRepository.findById(1L)).thenReturn(
                 java.util.Optional.of(mockMovie));
         when(mockMovie.getCharacters()).thenReturn(
                 Collections.singleton(new Character(image.getBytes(), "name", 45, 65, "story")));
 
-        assertEquals(characterServices.getFilteredCharacterList(
-                null,null,null, Long.valueOf(1)).spliterator().getExactSizeIfKnown(), 1);
+        Assertions.assertEquals(characterServices.getFilteredCharacterList(
+                null,null,null, 1L).spliterator().getExactSizeIfKnown(), 1);
     }
     @Test
     public void deleteCharacterThatDoesNotExist(){
-        assertEquals(0 , characterRepository.count() );
-        assertFalse(characterServices.deleteCharacter(Long.valueOf(1)));
+        Assertions.assertEquals(0 , characterRepository.count() );
+        Assertions.assertFalse(characterServices.deleteCharacter(1L));
     }
     @Test
     public void deleteCharacter() throws IOException {
-        when(characterRepository.findById(Long.valueOf(1))).thenReturn(
+        when(characterRepository.findById(1L)).thenReturn(
                 java.util.Optional.of(new Character()));
-        assertTrue(characterServices.deleteCharacter(Long.valueOf(1)));
-        assertEquals(characterRepository.count(), 0);
+        Assertions.assertTrue(characterServices.deleteCharacter(1L));
+        Assertions.assertEquals(characterRepository.count(), 0);
 
     }
 }
