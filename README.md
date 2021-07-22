@@ -13,18 +13,25 @@ https://spring.io/guides/gs/accessing-data-mysql/
 > 
 > spring.jpa.hibernate.ddl-auto=create-drop  -> Drops the database schema every time the server starts
 > .May throw DDL exceptions.
+> 
+> Rename application.properties.example to application.properties
+> 
+> Rename application-test.properties.example to application-test.properties
+> 
+> Replace the username and password values with your own values in both files.
+
 
 # Database setup:
 > mysql> create database movies; -- Creates the new production database
 > 
 > mysql> create database movies_dev; -- Creates the new test database
 > 
-> mysql> create user 'springuser'@'%' identified by 'ThePassword'; -- Creates the user
+> mysql> grant all on movies.* to '<YOURUSER>'@'%'; -- Gives all privileges to the user on the newly created database
 > 
-> mysql> grant all on movies.* to 'springuser'@'%'; -- Gives all privileges to the new user on the newly created database
+> mysql> grant all on movies_dev.* to '<YOURPASSWORD>'@'%'; -- Gives all privileges to the user on the newly created database
 > 
-> mysql> grant all on movies_dev.* to 'springuser'@'%'; -- Gives all privileges to the new user on the newly created database
-> 
+
+## Useful links and resources:
 # Many-to-many implementation
 > https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
 >
@@ -53,3 +60,7 @@ https://spring.io/guides/gs/accessing-data-mysql/
 > https://dzone.com/articles/integrate-sendgrid-with-a-spring-boot-and-java-app
 >
 > https://app.sendgrid.com/guide/integrate/langs/java
+> 
+> Create a file sendgrid.env with your sendgrid API key or paste it on
+> 
+> src/main/java/com/moviesAPI/moviesAPI/config/WebSecurityConfig.java
