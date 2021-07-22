@@ -1,10 +1,10 @@
 package com.moviesAPI.moviesAPI;
 
-import com.moviesAPI.moviesAPI.entities.Character;
-import com.moviesAPI.moviesAPI.repositories.CharacterRepository;
-import com.moviesAPI.moviesAPI.repositories.GenreRepository;
-import com.moviesAPI.moviesAPI.repositories.MovieRepository;
-import com.moviesAPI.moviesAPI.utils.MultiPartResource;
+import com.moviesAPI.entities.Character;
+import com.moviesAPI.repositories.CharacterRepository;
+import com.moviesAPI.repositories.GenreRepository;
+import com.moviesAPI.repositories.MovieRepository;
+import com.moviesAPI.utils.MultiPartResource;
 
 
 import org.assertj.core.api.Assertions;
@@ -13,12 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 
 import org.springframework.http.MediaType;
@@ -35,7 +33,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Optional;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
