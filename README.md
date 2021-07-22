@@ -18,7 +18,7 @@ https://spring.io/guides/gs/accessing-data-mysql/
 > 
 > Rename application-test.properties.example to application-test.properties
 > 
-> Replace the username and password values with your own values in both files.
+> Replace the username and password values with your own mysql credentials in both files.
 
 
 # Database setup:
