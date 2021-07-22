@@ -15,11 +15,15 @@ https://spring.io/guides/gs/accessing-data-mysql/
 > .May throw DDL exceptions.
 
 # Database setup:
-> mysql> create database movies; -- Creates the new database
+> mysql> create database movies; -- Creates the new production database
+> 
+> mysql> create database movies_dev; -- Creates the new test database
 > 
 > mysql> create user 'springuser'@'%' identified by 'ThePassword'; -- Creates the user
 > 
 > mysql> grant all on movies.* to 'springuser'@'%'; -- Gives all privileges to the new user on the newly created database
+> 
+> mysql> grant all on movies_dev.* to 'springuser'@'%'; -- Gives all privileges to the new user on the newly created database
 > 
 # Many-to-many implementation
 > https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
