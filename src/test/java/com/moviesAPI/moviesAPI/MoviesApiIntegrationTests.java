@@ -1,6 +1,8 @@
 package com.moviesAPI.moviesAPI;
 
 import com.moviesAPI.entities.Character;
+import com.moviesAPI.entities.Genre;
+import com.moviesAPI.entities.Movie;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.repositories.MovieRepository;
@@ -28,11 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 
 
-
-
-
 import java.io.IOException;
 import java.util.Iterator;
+
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -60,12 +60,7 @@ public class MoviesApiIntegrationTests {
 
     MultipartFile image = new MockMultipartFile("image",new byte[12]);
 
-
     String token = "";
-    private Long characterId;
-    private Long movieId;
-    private Long genreId;
-
 
     @BeforeAll
     public void setup() throws IOException {
@@ -121,12 +116,44 @@ public class MoviesApiIntegrationTests {
                 .isOk()
                 .expectBody(String.class)
                 .isEqualTo("Character created successfully!");
-        characterId = obtainAnyValidCharacterId();
+        //characterId = obtainAnyValidCharacterId();
         //create a  test movie
+        map.clear();
+        map.add("title", "Captain Marvel");
+        map.add("rating", 4);
+        map.add("releaseYear", 2019);
+        map.add("multipartImage", resource);
 
+        this.webTestClient
+                .post()
+                .uri("/movies/add")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("Movie  Captain Marvel created successfully");
         //create a test genre
-    }
+        map.clear();
+        map.add("name", "Fantasy");
+        map.add("multipartImage", resource);
 
+        this.webTestClient
+                .post()
+                .uri("/genres/add")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("Fantasy Saved");
+    }
     @Test
     public void createAccountWithInvalidData(){
         LinkedMultiValueMap map = new LinkedMultiValueMap();
@@ -392,9 +419,10 @@ public class MoviesApiIntegrationTests {
     }
     @Test
     public void deleteCharacterWithAuthWorks(){
+        Long characterId = obtainAnyValidCharacterId();
         this.webTestClient
                 .delete()
-                .uri("/characters/delete?id="+obtainAnyValidCharacterId())
+                .uri("/characters/delete?id="+characterId)
                 .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
                 .exchange()
@@ -402,10 +430,313 @@ public class MoviesApiIntegrationTests {
                 .isOk()
                 .expectBody(String.class)
                 .isEqualTo("deleted!");
+
+        this.webTestClient
+                .get()
+                .uri("/characters/detail?id="+characterId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Character doesn't exist");
     }
+    @Test
+    public void filterByWithoutParamsReturnsAllCharacters(){
+        long numberOfCharacters = characterRepository.count();
+       long size = this.webTestClient
+                .get()
+                .uri("/characters/")
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Iterable.class)
+               .returnResult().getResponseBody().spliterator().getExactSizeIfKnown();
+        Assertions.assertThat(numberOfCharacters == size); // Assertions are ignored for some reason..
+
+    }
+    @Test
+    public void addAMovieToACharacterWorks(){
+        Long characterId = obtainAnyValidCharacterId();
+        //check that the character doesn't have any movies
+        this.webTestClient
+                .get()
+                .uri("/characters/detail?id="+characterId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("movies").isEmpty();
+
+        Long movieId = obtainAnyValidMovieId();
+
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("id", characterId);
+        map.add("moviesIds", movieId);
+        // edit the character to add a movie.
+        this.webTestClient
+                .post()
+                .uri("/characters/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+
+                .expectBody(String.class)
+                .isEqualTo("Character updated successfully");
+        //check that the character has a movie now.
+        this.webTestClient
+                .get()
+                .uri("/characters/detail?id="+characterId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("movies").isNotEmpty();
+    }
+    @Test
+    public void createMovieWithMissingFields() throws IOException {
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("title", "Avengers");
+        map.add("releaseYear", 2012);
+        map.add("multipartImage", resource);
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/add")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+
+    }
+    @Test
+    public void createMovieWithInvalidData() throws IOException {
+        // with invalid releaseYear
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("title", "Avengers");
+        map.add("releaseYear", 1492);
+        map.add("rating", 4);
+        map.add("multipartImage", resource);
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/add")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Movie release year can't be prior to 1900!");
+        // with invalid rating
+        map.set("rating", 6);
+        map.set("releaseYear", 2012);
+
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/add")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Movie rating has to be between 1 and 5");
+    }
+    @Test
+    public void editAMovieWithoutAuth() throws IOException {
+
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("id",1);
+        map.add("title", "Avengers2");
+
+        this.webTestClient
+                .post()
+                .uri("/movies/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+    @Test
+    public void editAMovieWithInvalidData() throws IOException {
+        // with invalid releaseYear
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("id", obtainAnyValidMovieId());
+        map.add("releaseYear", 1492);
+
+        this.webTestClient
+                .post()
+                .uri("/movies/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Movie release year can't be prior to 1900!");
+        // with invalid rating
+        map.set("rating", 6);
+        map.set("releaseYear", 2012);
+
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Movie rating has to be between 1 and 5");
+    }
+    @Test
+    public void editMovieWithMissingRequiredParameterId(){
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("rating", 5);
+
+        this.webTestClient
+                .post()
+                .uri("/movies/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
+    @Test
+    public void editMovieWithAuthWorks(){
+        Long movieId = obtainAnyValidMovieId();
+        String newTitle = "new edited title";
+        Integer newRating =  (int) ((Math.random() * (5 - 1)) + 1);
+        Integer newReleaseYear = 1999;
+
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("id", movieId);
+        map.add("title", newTitle);
+        map.add("releaseYear", newReleaseYear);
+        map.add("rating", newRating);
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("Movie with Id: " + movieId +" updated successfully");
+
+        this.webTestClient
+                .get()
+                .uri("/movies/detail?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("title").isEqualTo(newTitle)
+                .jsonPath("rating").isEqualTo(newRating)
+                .jsonPath("releaseYear").isEqualTo(newReleaseYear);
+
+
+    }
+    @Test
+    public void deleteMovieWithoutAuth(){
+        this.webTestClient
+                .delete()
+                .uri("/movies/delete?id="+1)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
+    //@Test
+    public void deleteMovieWithAuthWorks(){
+        Long movieId = obtainAnyValidMovieId();
+        this.webTestClient
+                .delete()
+                .uri("/movies/delete?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("deleted!");
+
+        this.webTestClient
+                .get()
+                .uri("/movies/detail?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Movie with Id: "+ movieId +" doesn't exist");
+    }
+
     private Long obtainAnyValidCharacterId(){
         Iterable<Character> character = characterRepository.findAll();
         Iterator<Character> it = character.iterator();
+        long id = 1;
+        while (it.hasNext()){
+            id = it.next().getId();
+        }
+        return id;
+    }
+    private Long obtainAnyValidMovieId(){
+        Iterable<Movie> movie = movieRepository.findAll();
+        Iterator<Movie> it = movie.iterator();
+        long id = 1;
+        while (it.hasNext()){
+            id = it.next().getId();
+        }
+        return id;
+    }
+    private Long obtainAnyValidGenreId(){
+        Iterable<Genre> genres = genreRepository.findAll();
+        Iterator<Genre> it = genres.iterator();
         long id = 1;
         while (it.hasNext()){
             id = it.next().getId();
