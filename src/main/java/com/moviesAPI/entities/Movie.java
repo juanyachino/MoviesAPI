@@ -42,11 +42,11 @@ public class Movie {
         this.genres = genres;
     }
 
-    @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)
+    @ManyToMany
     @JsonIgnoreProperties("movies")
     private Set<Character> characters = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL,mappedBy = "movies", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "movies")
     @JsonManagedReference
     private Set<Genre> genres = new HashSet<>();
 
@@ -94,4 +94,6 @@ public class Movie {
     public Set<Genre> getGenres() {
         return genres;
     }
+
+
 }

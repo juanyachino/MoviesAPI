@@ -27,16 +27,24 @@ public class Character {
 
     private String story;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(name = "characters_movies",
             joinColumns = {
                     @JoinColumn(name = "character_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)},
+                            nullable = false, updatable = false,
+                            foreignKey = @ForeignKey(
+                            name="FK_CHAR_ID",
+                            foreignKeyDefinition = "FOREIGN KEY (character_id) REFERENCES CHARACTERS(id) ON UPDATE CASCADE ON DELETE CASCADE"))},
             inverseJoinColumns = {
                     @JoinColumn(name = "movie_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)})
+                            nullable = false, updatable = false,
+                            foreignKey = @ForeignKey(
+                            name="FK_MOVIE_ID",
+                            foreignKeyDefinition = "FOREIGN KEY (movie_id) REFERENCES MOVIES(id) ON UPDATE CASCADE ON DELETE CASCADE")
+                    )})
     @JsonIgnoreProperties("characters")
     Set<Movie> movies = new HashSet<>();
+
     public Character(){ }
     public Character(byte[] image, String name, Integer age, Integer weight, String story) {
         this.image = image;

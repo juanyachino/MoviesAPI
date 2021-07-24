@@ -690,7 +690,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isForbidden();
     }
-    //@Test
+    @Test
     public void deleteMovieWithAuthWorks(){
         Long movieId = obtainAnyValidMovieId();
         this.webTestClient
