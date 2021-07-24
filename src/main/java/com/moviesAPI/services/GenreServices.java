@@ -1,5 +1,6 @@
 package com.moviesAPI.services;
 
+import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.entities.Movie;
 import com.moviesAPI.repositories.GenreRepository;
@@ -35,5 +36,19 @@ public class GenreServices {
             }
         }
         genreRepository.save(genre);
+    }
+
+    public boolean deleteGenre(Long id) {
+        Optional<Genre> genreFound = genreRepository.findById(id);
+        if (!genreFound.isPresent()) {
+            return false;
+        }
+        genreRepository.delete(genreFound.get());
+        return true;
+    }
+
+    public Genre getGenreDetails(Long id) {
+        Optional<Genre> genre = genreRepository.findById(id);
+        return genre.orElse(null);
     }
 }
