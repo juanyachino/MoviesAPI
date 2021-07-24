@@ -1,4 +1,7 @@
 ## MOVIESAPI 
+
+# Postman Documentation
+https://documenter.getpostman.com/view/16508703/TzsZrTe3
 # Using JPA with mysql access implementation.
 https://spring.io/guides/gs/accessing-data-mysql/
 
