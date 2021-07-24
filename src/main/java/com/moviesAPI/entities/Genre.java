@@ -24,10 +24,16 @@ public class Genre {
     @JoinTable(name = "genres_movies",
             joinColumns = {
                     @JoinColumn(name = "genre_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)},
+                            nullable = false, updatable = false,
+                            foreignKey = @ForeignKey(
+                                    name="FK_GENRE_ID",
+                                    foreignKeyDefinition = "FOREIGN KEY (genre_id) REFERENCES GENRE(id) ON UPDATE CASCADE ON DELETE CASCADE"))},
             inverseJoinColumns = {
                     @JoinColumn(name = "movie_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)})
+                            nullable = false, updatable = false,
+                            foreignKey = @ForeignKey(
+                                    name="FK_MOVIE_ID",
+                                    foreignKeyDefinition = "FOREIGN KEY (movie_id) REFERENCES MOVIE(id) ON UPDATE CASCADE ON DELETE CASCADE"))})
     @JsonBackReference
     Set<Movie> movies = new HashSet<>();
 
