@@ -136,6 +136,25 @@ public class MoviesApiIntegrationTests {
                 .isOk()
                 .expectBody(String.class)
                 .isEqualTo("Movie  Captain Marvel created successfully");
+        // create a second test movie
+        map.clear();
+        map.add("title", "Ironman");
+        map.add("rating", 4);
+        map.add("releaseYear", 2008);
+        map.add("multipartImage", resource);
+
+        this.webTestClient
+                .post()
+                .uri("/movies/add")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("Movie  Ironman created successfully");
         //create a test genre
         map.clear();
         map.add("name", "Fantasy");
@@ -715,7 +734,147 @@ public class MoviesApiIntegrationTests {
                 .expectBody(String.class)
                 .isEqualTo("Movie with Id: "+ movieId +" doesn't exist");
     }
+    @Test
+    public void deletingAGenreDoesNotDeleteAMovieAssociatedToIt(){
+        //edit the movie to associate a genre
+        Long movieId = obtainAnyValidMovieId();
+        Long genreId = obtainAnyValidGenreId();
 
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("id", movieId);
+        map.add("genresIds", genreId);
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("Movie with Id: " + movieId +" updated successfully");
+        //check that the genre was associated successfully
+        this.webTestClient
+                .get()
+                .uri("/movies/detail?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("genres").isNotEmpty();
+
+        //delete the genre
+        this.webTestClient
+                .delete()
+                .uri("/genres/delete?id="+genreId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("deleted!");
+
+        //check that the genre was deleted successfully
+        this.webTestClient
+                .get()
+                .uri("/genres/detail?id="+genreId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Genre doesn't exist");
+
+        //check that the movie survived the genre deletion.
+        this.webTestClient
+                .get()
+                .uri("/movies/detail?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("id").isEqualTo(movieId)
+                .jsonPath("genres").isEmpty();
+
+    }
+    @Test
+    public void deletingAMovieDoesNotDeleteAGenreAssociatedToIt(){
+
+        //edit the movie to associate a genre
+        Long movieId = obtainAnyValidMovieId();
+        Long genreId = obtainAnyValidGenreId();
+
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        map.add("id", movieId);
+        map.add("genresIds", genreId);
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/edit")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("Movie with Id: " + movieId +" updated successfully");
+        //check that the genre was associated successfully
+        this.webTestClient
+                .get()
+                .uri("/movies/detail?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("genres").isNotEmpty();
+        //delete the movie
+        this.webTestClient
+                .delete()
+                .uri("/movies/delete?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .isEqualTo("deleted!");
+        //check that the movie was deleted successfully
+        this.webTestClient
+                .get()
+                .uri("/movies/detail?id="+movieId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("Movie with Id: "+ movieId +" doesn't exist");
+        //check that the genre still exists
+        this.webTestClient
+                .get()
+                .uri("/genres/detail?id="+genreId)
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("id").isEqualTo(genreId);
+
+    }
     private Long obtainAnyValidCharacterId(){
         Iterable<Character> character = characterRepository.findAll();
         Iterator<Character> it = character.iterator();
