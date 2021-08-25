@@ -3,8 +3,7 @@ package com.moviesAPI.services;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.entities.Movie;
-import com.moviesAPI.exceptions.InvalidReleaseYearException;
-import com.moviesAPI.exceptions.InvalidMovieRatingException;
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.repositories.MovieRepository;
@@ -29,12 +28,12 @@ public class MovieServices {
 
     public void createMovie (String title, Integer releaseYear, Integer rating, List<Long> genresIds,
                              List<Long> charactersIds, MultipartFile multipartImage)
-            throws IOException, InvalidReleaseYearException, InvalidMovieRatingException {
+            throws IOException, InvalidDataException {
         if (releaseYear <= 1900) {
-            throw new InvalidReleaseYearException("Movie release year can't be prior to 1900");
+            throw new InvalidDataException("Movie release year can't be prior to 1900");
         }
         if (rating < 1 || rating > 5) {
-            throw new InvalidMovieRatingException("Movie rating has to be a value between 1 and 5");
+            throw new InvalidDataException("Movie rating has to be a value between 1 and 5");
         }
         Movie movie = new Movie(multipartImage.getBytes(), title,releaseYear,rating);
         if (charactersIds != null) {
@@ -48,7 +47,7 @@ public class MovieServices {
     }
     public boolean editMovie (Long id,String title, Integer releaseYear, Integer rating,List<Long> charactersIds,
                               List<Long> genresIds,
-                              MultipartFile multipartImage) throws IOException, InvalidReleaseYearException, InvalidMovieRatingException {
+                              MultipartFile multipartImage) throws IOException, InvalidDataException {
         Optional<Movie> movies = movieRepository.findById(id);
 
 
@@ -61,13 +60,13 @@ public class MovieServices {
         }
         if (releaseYear != null) {
             if (releaseYear <= 1900) {
-                throw new InvalidReleaseYearException("Movie release year can't be prior to 1900");
+                throw new InvalidDataException("Movie release year can't be prior to 1900");
             }
             movie.setReleaseYear(releaseYear);
         }
         if (rating != null) {
             if (rating < 1 || rating > 5) {
-                throw new InvalidMovieRatingException("Movie rating has to be a value between 1 and 5");
+                throw new InvalidDataException("Movie rating has to be a value between 1 and 5");
             }
             movie.setRating(rating);
         }

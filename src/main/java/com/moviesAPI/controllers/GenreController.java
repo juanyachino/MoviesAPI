@@ -1,7 +1,6 @@
 package com.moviesAPI.controllers;
 
 
-import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.services.GenreServices;
 import org.springframework.beans.factory.annotation.Autowired;

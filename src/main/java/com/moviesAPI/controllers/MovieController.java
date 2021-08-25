@@ -3,8 +3,7 @@ package com.moviesAPI.controllers;
 
 
 import com.moviesAPI.entities.Movie;
-import com.moviesAPI.exceptions.InvalidReleaseYearException;
-import com.moviesAPI.exceptions.InvalidMovieRatingException;
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.services.MovieServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -38,16 +37,10 @@ public class MovieController {
         // @RequestParam means it is a parameter from the GET or POST request
         try {
             movieServices.createMovie(title, releaseYear, rating, genresIds, charactersIds, multipartImage);
-        } catch (InvalidReleaseYearException e) {
-            e.printStackTrace();
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    "Movie release year can't be prior to 1900!",
-                    HttpStatus.BAD_REQUEST);
-        } catch (InvalidMovieRatingException e) {
+        } catch (InvalidDataException e) {
             e.printStackTrace();
             return new ResponseEntity<>(
-                    "Movie rating has to be between 1 and 5",
+                    e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(
@@ -71,15 +64,10 @@ public class MovieController {
                     new ResponseEntity<>(
                             "Movie with Id: "+ id +"doesn't exist",
                             HttpStatus.BAD_REQUEST);
-        } catch (InvalidReleaseYearException e) {
+        } catch (InvalidDataException e) {
             e.printStackTrace();
             return new ResponseEntity<>(
-                    "Movie release year can't be prior to 1900!",
-                    HttpStatus.BAD_REQUEST);
-        } catch (InvalidMovieRatingException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    "Movie rating has to be between 1 and 5",
+                    e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
     }

@@ -1,11 +1,7 @@
 package com.moviesAPI.controllers;
 
 
-
-import com.moviesAPI.exceptions.EmailAlreadyExistsException;
-import com.moviesAPI.exceptions.InvalidPasswordException;
-import com.moviesAPI.exceptions.InvalidUsernameException;
-import com.moviesAPI.exceptions.UsernameAlreadyTakenException;
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.UserRepository;
 import com.moviesAPI.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,25 +33,10 @@ public class UserController {
             return new ResponseEntity<>(
                     userServices.register(username,password,email),
                     HttpStatus.OK);
-        } catch (InvalidUsernameException e) {
+        } catch (InvalidDataException e) {
             e.printStackTrace();
             return new ResponseEntity<>(
-                    "Username must be at least 5 characters long!",
-                    HttpStatus.BAD_REQUEST);
-        } catch (InvalidPasswordException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    "Password must be at least 5 characters long!",
-                    HttpStatus.BAD_REQUEST);
-        } catch (EmailAlreadyExistsException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    "Email already exists on database",
-                    HttpStatus.BAD_REQUEST);
-        } catch (UsernameAlreadyTakenException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    "username already taken!",
+                    e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
     }

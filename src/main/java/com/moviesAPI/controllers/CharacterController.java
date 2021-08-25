@@ -4,8 +4,8 @@ package com.moviesAPI.controllers;
 
 
 import com.moviesAPI.entities.Character;
-import com.moviesAPI.exceptions.InvalidAgeException;
-import com.moviesAPI.exceptions.InvalidWeightException;
+
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.services.CharacterServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -36,21 +36,17 @@ public class CharacterController {
 
         try {
             characterServices.createCharacter(name,story,age,weight,moviesIds,multipartImage);
-        } catch (InvalidAgeException e) {
+        } catch (InvalidDataException e) {
             e.printStackTrace();
             return new ResponseEntity<>(
-                    "Character's age is invalid!",
-                    HttpStatus.BAD_REQUEST);
-        } catch (InvalidWeightException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    "Character's weight is invalid!",
+                    e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(
                 "Character created successfully!",
                 HttpStatus.OK);
     }
+
     @PostMapping(path="/edit")
     @Description("Edits any character's field. editing movies removes the previously saved movies!")
     public @ResponseBody ResponseEntity<String> editCharacter (@RequestParam Long id,
@@ -69,14 +65,10 @@ public class CharacterController {
                     new ResponseEntity<>(
                             "Character doesn't exist",
                             HttpStatus.BAD_REQUEST);
-        } catch (InvalidAgeException e) {
+        } catch (InvalidDataException e) {
             e.printStackTrace();
             return new ResponseEntity<>(
-                    "Character's age is invalid!",
-                    HttpStatus.BAD_REQUEST);
-        } catch (InvalidWeightException e) {
-            return new ResponseEntity<>(
-                    "Character's weight is invalid!",
+                    e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
     }

@@ -1,10 +1,8 @@
 package com.moviesAPI.services;
 
 import com.moviesAPI.entities.User;
-import com.moviesAPI.exceptions.EmailAlreadyExistsException;
-import com.moviesAPI.exceptions.InvalidPasswordException;
-import com.moviesAPI.exceptions.InvalidUsernameException;
-import com.moviesAPI.exceptions.UsernameAlreadyTakenException;
+
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -41,19 +39,18 @@ public class UserServices {
         return token;
     }
     public String register(String username, String password, String email)
-            throws InvalidUsernameException, InvalidPasswordException, UsernameAlreadyTakenException,
-            EmailAlreadyExistsException {
+            throws InvalidDataException {
         if (username.length() < 5) {
-            throw new InvalidUsernameException("the username must be at least 5 characters long!");
+            throw new InvalidDataException("the username must be at least 5 characters long!");
         }
         if (password.length() < 5) {
-            throw new InvalidPasswordException("the password must be at least 5 characters long!");
+            throw new InvalidDataException("the password must be at least 5 characters long!");
         }
         if (userRepository.findByEmail(email).isPresent()){
-            throw new EmailAlreadyExistsException("the email already exists");
+            throw new InvalidDataException("the email already exists");
         }
         if (userRepository.findByUsername(username).isPresent()){
-            throw new UsernameAlreadyTakenException("the username is already taken");
+            throw new InvalidDataException("the username is already taken");
         }
         User user = new User();
         user.setUsername(username);
