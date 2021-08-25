@@ -2,8 +2,7 @@ package com.moviesAPI.services;
 
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Movie;
-import com.moviesAPI.exceptions.InvalidAgeException;
-import com.moviesAPI.exceptions.InvalidWeightException;
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.MovieRepository;
 import org.junit.jupiter.api.Assertions;
@@ -40,7 +39,7 @@ public class CharacterServicesTests {
     MultipartFile image = new MockMultipartFile("image",new byte[32]);
 
     @Test
-    public void createCharacterTest() throws IOException, InvalidAgeException, InvalidWeightException {
+    public void createCharacterTest() throws IOException, InvalidDataException{
 
         long precount = characterRepository.count();
         characterServices.createCharacter("TEST", "test", 123, 65,
@@ -50,7 +49,7 @@ public class CharacterServicesTests {
 
     }
     @Test
-    public void editCharacterWorks() throws IOException, InvalidAgeException, InvalidWeightException {
+    public void editCharacterWorks() throws IOException, InvalidDataException {
         when(characterRepository.findById(1L)).thenReturn(
                 java.util.Optional.of(new Character(image.getBytes(), "String name", 30, 65, "String story")));
 
@@ -62,7 +61,6 @@ public class CharacterServicesTests {
         Assertions.assertEquals(character.getAge() ,Integer.valueOf(40));
         Assertions.assertEquals(character.getWeight() ,Integer.valueOf(55));
         Assertions.assertEquals(character.getImage() ,image.getBytes());
-
 
 
     }

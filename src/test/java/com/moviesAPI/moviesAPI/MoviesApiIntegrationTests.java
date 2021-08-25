@@ -295,7 +295,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Character's age is invalid!");
+                .isEqualTo("Age can not be a negative number!");
         // with invalid weight
         map.set("age", 25);
         map.set("weight", -65);
@@ -313,7 +313,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Character's weight is invalid!");
+                .isEqualTo("Weight can not be a negative number!");
     }
     @Test
     public void editACharacterWithoutAuth() throws IOException {
@@ -350,7 +350,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Character's age is invalid!");
+                .isEqualTo("Age can not be a negative number!");
         //With invalid weight
         map.set("age", 25);
         map.add("weight", -65);
@@ -367,7 +367,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Character's weight is invalid!");
+                .isEqualTo("Weight can not be a negative number!");
     }
     @Test
     public void editCharacterWithMissingRequiredParameterId(){
@@ -566,7 +566,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Movie release year can't be prior to 1900!");
+                .isEqualTo("Movie release year can't be prior to 1900");
         // with invalid rating
         map.set("rating", 6);
         map.set("releaseYear", 2012);
@@ -584,7 +584,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Movie rating has to be between 1 and 5");
+                .isEqualTo("Movie rating has to be a value between 1 and 5");
     }
     @Test
     public void editAMovieWithoutAuth() throws IOException {
@@ -621,7 +621,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Movie release year can't be prior to 1900!");
+                .isEqualTo("Movie release year can't be prior to 1900");
         // with invalid rating
         map.set("rating", 6);
         map.set("releaseYear", 2012);
@@ -639,7 +639,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Movie rating has to be between 1 and 5");
+                .isEqualTo("Movie rating has to be a value between 1 and 5");
     }
     @Test
     public void editMovieWithMissingRequiredParameterId(){
