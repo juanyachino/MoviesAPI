@@ -9,7 +9,7 @@ import com.moviesAPI.repositories.MovieRepository;
 import com.moviesAPI.utils.MultiPartResource;
 
 
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -207,7 +207,7 @@ public class MoviesApiIntegrationTests {
         map.add("username", "asdasda");
         map.add("password", "faasdfafaan");
         map.add("email", "asdasds@email.com");
-        Assertions.assertThat(map.containsKey("email"));
+        Assertions.assertTrue(map.containsKey("email"));
         this.webTestClient
                 .post()
                 .uri("/auth/login")
@@ -474,7 +474,7 @@ public class MoviesApiIntegrationTests {
                 .isOk()
                 .expectBody(Iterable.class)
                .returnResult().getResponseBody().spliterator().getExactSizeIfKnown();
-        Assertions.assertThat(numberOfCharacters == size); // Assertions are ignored for some reason..
+        Assertions.assertEquals(numberOfCharacters, size);
 
     }
     @Test
