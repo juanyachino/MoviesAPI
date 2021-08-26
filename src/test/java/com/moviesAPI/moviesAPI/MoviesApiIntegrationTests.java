@@ -17,27 +17,32 @@ import org.junit.jupiter.api.TestInstance;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.core.io.ByteArrayResource;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
 
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
+import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -61,6 +66,7 @@ public class MoviesApiIntegrationTests {
     MultipartFile image = new MockMultipartFile("image",new byte[12]);
 
     String token = "";
+    //FluxExchangeResult<CsrfToken> CSRFToken;
 
     @BeforeAll
     public void setup() throws IOException {
@@ -93,6 +99,19 @@ public class MoviesApiIntegrationTests {
                  .returnResult(String.class)
                  .getResponseBody()
                  .blockFirst();
+
+         // hit a GET endpoint to get the CSFR token
+        /*this.CSRFToken = this.webTestClient
+                .get()
+                .uri("/auth/csrf")
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .returnResult(CsrfToken.class);
+
+*/
 
          //create a test  character
         ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");

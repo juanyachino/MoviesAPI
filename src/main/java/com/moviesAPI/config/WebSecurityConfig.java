@@ -12,7 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 
 @EnableWebSecurity
@@ -21,6 +21,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final String SENDGRID_API_KEY = System.getenv("SENDGRID_API_KEY");
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        //http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        //http.csrf((csrf) -> csrf.ignoringAntMatchers("/auth/login","/auth/register"))
         http.csrf().disable()
                 .addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
