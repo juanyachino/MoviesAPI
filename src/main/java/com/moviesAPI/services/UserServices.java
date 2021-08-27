@@ -1,5 +1,7 @@
 package com.moviesAPI.services;
 
+import com.moviesAPI.DTO.UserLoginDTO;
+import com.moviesAPI.DTO.UserRegisterDTO;
 import com.moviesAPI.entities.User;
 
 import com.moviesAPI.exceptions.InvalidDataException;
@@ -27,25 +29,28 @@ public class UserServices {
     @Autowired
     EmailService sendGridEmailService;
 
-    public String login (String username, String password){
-        Optional<User> userFound = userRepository.findByUsername(username);
-        if ((!userFound.isPresent()) || !passwordEncoder.matches(password, userFound.get().getPassword())) {
+    public String login (UserLoginDTO userDTO){
+        Optional<User> userFound = userRepository.findByUsername(userDTO.getUsername());
+        if ((!userFound.isPresent()) || !passwordEncoder.matches(userDTO.getPassword(), userFound.get().getPassword())) {
             return "Incorrect username and/or password. try again";
         }
         User user = userFound.get();
-        String token = getJWTToken(username);
+        String token = getJWTToken(user.getUsername());
         user.setToken(token);
         userRepository.save(user);
         return token;
     }
-    public String register (User user) throws InvalidDataException {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()){
+    public String register (UserRegisterDTO userDTO) throws InvalidDataException {
+        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()){
             throw new InvalidDataException("the username is already taken");
         }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()){
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()){
             throw new InvalidDataException("the email already exists");
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User user = new User();
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         userRepository.save(user);
         sendWelcomeEmail(user.getEmail(),user.getUsername());
         return "account created successfully!";

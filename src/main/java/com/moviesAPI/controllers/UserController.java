@@ -1,14 +1,14 @@
 package com.moviesAPI.controllers;
 
 
-import com.moviesAPI.entities.User;
+import com.moviesAPI.DTO.UserLoginDTO;
+import com.moviesAPI.DTO.UserRegisterDTO;
 import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -21,20 +21,20 @@ public class UserController {
     private UserServices userServices;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody User user)  {
+    public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO userDTO)  {
         return new ResponseEntity<>(
-                userServices.login(user.getUsername(),user.getPassword()),
+                userServices.login(userDTO),
                 HttpStatus.OK);
     }
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody User user)  {
+    public ResponseEntity<String> register(@Valid @RequestBody UserRegisterDTO userDTO)  {
         try {
-            return ResponseEntity.ok(userServices.register(user));
+            return ResponseEntity.ok(userServices.register(userDTO));
         } catch (InvalidDataException e) {
             e.printStackTrace();
             return new ResponseEntity<>(
                     e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
+                    HttpStatus.OK);
         }
     }
 }

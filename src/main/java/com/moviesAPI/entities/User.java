@@ -2,8 +2,6 @@ package com.moviesAPI.entities;
 
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
-
 
 @Entity // This tells Hibernate to make a table out of this class
 @Table(name = "users")
@@ -14,11 +12,9 @@ public class User  {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    @Size(min = 5,message = "username must be at least 5 characters long")
     private String username;
 
     @Column(nullable = false)
-    @Size(min = 5,message = "password must be at least 5 characters long")
     private String password;
 
     @Column(nullable = false, unique = true)
