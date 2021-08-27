@@ -1,5 +1,6 @@
 package com.moviesAPI.services;
 
+import com.moviesAPI.DTO.GenreDTO;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.entities.Movie;
@@ -20,14 +21,19 @@ public class GenreServices {
     private GenreRepository genreRepository;
     @Autowired
     private MovieRepository movieRepository;
-    public void createGenre (String name,List<Long> moviesIds,
-                             MultipartFile multipartImage) throws IOException {
+    public void createGenre (GenreDTO genreDTO,
+                             MultipartFile file) {
 
-        Genre genre = new Genre(name,multipartImage.getBytes());
+        Genre genre = null;
+        try {
+            genre = new Genre(genreDTO.getName(),file.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        if (moviesIds != null) {
+        if (genreDTO.getMoviesIds() != null) {
             //only previously added movies will be added to genre
-            for (Long movieId : moviesIds) {
+            for (Long movieId : genreDTO.getMoviesIds()) {
                 Optional<Movie> movies = movieRepository.findById(movieId);
                 if (movies.isPresent()) {
                     Movie movie = movies.get();
