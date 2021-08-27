@@ -3,6 +3,7 @@ package com.moviesAPI.moviesAPI;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.entities.Movie;
+import com.moviesAPI.entities.User;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.repositories.MovieRepository;
@@ -17,32 +18,32 @@ import org.junit.jupiter.api.TestInstance;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.core.io.ByteArrayResource;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.web.csrf.CsrfToken;
+
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.reactive.server.FluxExchangeResult;
+
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
-import reactor.core.publisher.Flux;
+
 
 
 import java.io.IOException;
-import java.util.HashSet;
+
 import java.util.Iterator;
-import java.util.Set;
+
 
 
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
+
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -75,10 +76,15 @@ public class MoviesApiIntegrationTests {
         map.add("username", TESTUSERNAME);
         map.add("password", TESTPASSWORD);
         map.add("email", TESTEMAIL);
+        User user = new User();
+        user.setUsername(TESTUSERNAME);
+        user.setEmail(TESTEMAIL);
+        user.setPassword(TESTPASSWORD);
         this.webTestClient
                 .post()
                 .uri("/auth/register")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(user))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus()
@@ -90,12 +96,14 @@ public class MoviesApiIntegrationTests {
         map.add("password", TESTPASSWORD);
 
          this.token = this.webTestClient
-                .post()
-                .uri("/auth/login").accept(MediaType.TEXT_PLAIN)
-                .body(BodyInserters.fromMultipartData(map))
-                .header(ACCEPT,APPLICATION_JSON_VALUE)
+                 .post()
+                 .uri("/auth/login")
+                 .contentType(MediaType.APPLICATION_JSON)
+                 .body(BodyInserters.fromValue(user))
+                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                  .exchange()
-                 .expectStatus().isOk()
+                 .expectStatus()
+                 .isOk()
                  .returnResult(String.class)
                  .getResponseBody()
                  .blockFirst();
@@ -194,27 +202,27 @@ public class MoviesApiIntegrationTests {
     }
     @Test
     public void createAccountWithInvalidData(){
-        LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("username", "J");
-        map.add("password", "juan1");
-        map.add("email", "juan1@email.com");
+        User user = new User();
+        user.setUsername("j");
+        user.setEmail(TESTEMAIL);
+        user.setPassword(TESTPASSWORD);
         this.webTestClient
                 .post()
                 .uri("/auth/register")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(user))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
 
-        map.clear();
-        map.add("username", "Juan1");
-        map.add("password", "j");
-        map.add("email", "juan1@email.com");
+        user.setUsername(TESTUSERNAME);
+        user.setPassword("ps");
         this.webTestClient
                 .post()
                 .uri("/auth/register")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(user))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus()
@@ -222,21 +230,21 @@ public class MoviesApiIntegrationTests {
     }
     @Test
     public void loginWithIncorrectCredentials(){
-        LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("username", "asdasda");
-        map.add("password", "faasdfafaan");
-        map.add("email", "asdasds@email.com");
-        Assertions.assertTrue(map.containsKey("email"));
+        User user = new User();
+        user.setUsername("asdasdafas");
+        user.setEmail("adsadafggasd");
+        user.setPassword("asdagadgsfdgd");
         this.webTestClient
                 .post()
                 .uri("/auth/login")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(user))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
-                .exchange().expectStatus()
+                .exchange()
+                .expectStatus()
                 .isOk()
                 .expectBody(String.class)
                 .isEqualTo("Incorrect username and/or password. try again");
-
     }
     @Test
     public void accessingProtectedResourceWithoutAuth() throws IOException {
@@ -314,7 +322,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Age can not be a negative number!");
+                .isEqualTo("not valid due to validation error: addNewCharacter.age: must be greater than or equal to 1");
         // with invalid weight
         map.set("age", 25);
         map.set("weight", -65);
@@ -332,7 +340,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Weight can not be a negative number!");
+                .isEqualTo("not valid due to validation error: addNewCharacter.weight: must be greater than or equal to 1");
     }
     @Test
     public void editACharacterWithoutAuth() throws IOException {
@@ -369,7 +377,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Age can not be a negative number!");
+                .isEqualTo("not valid due to validation error: editCharacter.age: must be greater than or equal to 1");
         //With invalid weight
         map.set("age", 25);
         map.add("weight", -65);
@@ -386,7 +394,7 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Weight can not be a negative number!");
+                .isEqualTo("not valid due to validation error: editCharacter.weight: must be greater than or equal to 1");
     }
     @Test
     public void editCharacterWithMissingRequiredParameterId(){
@@ -585,8 +593,8 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Movie release year can't be prior to 1900");
-        // with invalid rating
+                .isEqualTo("not valid due to validation error: addNewMovie.releaseYear: must be greater than or equal to 1900");
+        // with greater than 5 rating
         map.set("rating", 6);
         map.set("releaseYear", 2012);
 
@@ -603,7 +611,25 @@ public class MoviesApiIntegrationTests {
                 .expectStatus()
                 .isBadRequest()
                 .expectBody(String.class)
-                .isEqualTo("Movie rating has to be a value between 1 and 5");
+                .isEqualTo("not valid due to validation error: addNewMovie.rating: must be less than or equal to 5");
+        // with smaller than 1 rating
+        map.set("rating", 0);
+        map.set("releaseYear", 2012);
+
+
+
+        this.webTestClient
+                .post()
+                .uri("/movies/add")
+                .body(BodyInserters.fromMultipartData(map))
+                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("not valid due to validation error: addNewMovie.rating: must be greater than or equal to 1");
     }
     @Test
     public void editAMovieWithoutAuth() throws IOException {
