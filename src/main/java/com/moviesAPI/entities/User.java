@@ -3,7 +3,6 @@ package com.moviesAPI.entities;
 
 import javax.persistence.*;
 
-
 @Entity // This tells Hibernate to make a table out of this class
 @Table(name = "users")
 public class User  {
@@ -14,8 +13,10 @@ public class User  {
 
     @Column(nullable = false, unique = true)
     private String username;
+
     @Column(nullable = false)
     private String password;
+
     @Column(nullable = false, unique = true)
     private String email;
     @Transient //doesn't persist the token

@@ -4,6 +4,8 @@ package com.moviesAPI.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,13 +20,13 @@ public class Character {
     @Lob
     @Column(name = "image", columnDefinition="LONGBLOB")
     private byte[] image;
-
+    @NotEmpty
     private String name;
-
+    @Min(1)
     private Integer age;
-
+    @Min(1)
     private Integer weight;
-
+    @NotEmpty
     private String story;
 
     @ManyToMany

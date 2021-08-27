@@ -3,13 +3,15 @@ package com.moviesAPI.moviesAPI;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.entities.Movie;
+import com.moviesAPI.entities.User;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.repositories.MovieRepository;
 import com.moviesAPI.utils.MultiPartResource;
 
 
-import org.assertj.core.api.Assertions;
+import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,27 +19,33 @@ import org.junit.jupiter.api.TestInstance;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.core.io.ByteArrayResource;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+
 import org.springframework.test.context.TestPropertySource;
+
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.LinkedMultiValueMap;
+
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 
 
+
 import java.io.IOException;
+
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
-import static org.springframework.http.HttpHeaders.ACCEPT;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.MediaType.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -46,8 +54,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @TestPropertySource(properties="spring.datasource.url=jdbc:mysql://${MYSQL_HOST:localhost}:3306/movies_dev") // uses a different database
 public class MoviesApiIntegrationTests {
     private static final String TESTUSERNAME = "test1";
-    private static final String TESTPASSWORD = "test123";
-    private static final String TESTEMAIL = "test@email.com";
+    private static final String TESTPASSWORD = "Test123!";
+    private static final String TESTEMAIL = "test@gmail.com";
     @Autowired
     private WebTestClient webTestClient;
 
@@ -62,111 +70,124 @@ public class MoviesApiIntegrationTests {
 
     String token = "";
 
+
     @BeforeAll
     public void setup() throws IOException {
         //User account creation
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("username", TESTUSERNAME);
-        map.add("password", TESTPASSWORD);
-        map.add("email", TESTEMAIL);
+        JSONObject userForm = new JSONObject();
+        userForm.put("username",TESTUSERNAME);
+        userForm.put("password",TESTPASSWORD);
+        userForm.put("email",TESTEMAIL);
         this.webTestClient
                 .post()
                 .uri("/auth/register")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(userForm.toJSONString()))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus()
                 .isOk();
 
         //login to get the jwt
-        map.clear();
-        map.add("username", TESTUSERNAME);
-        map.add("password", TESTPASSWORD);
 
-         this.token = this.webTestClient
-                .post()
-                .uri("/auth/login").accept(MediaType.TEXT_PLAIN)
-                .body(BodyInserters.fromMultipartData(map))
-                .header(ACCEPT,APPLICATION_JSON_VALUE)
+        this.token = this.webTestClient
+                 .post()
+                 .uri("/auth/login")
+                 .contentType(MediaType.APPLICATION_JSON)
+                 .body(BodyInserters.fromValue(userForm.toJSONString()))
+                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                  .exchange()
-                 .expectStatus().isOk()
+                 .expectStatus()
+                 .isOk()
                  .returnResult(String.class)
                  .getResponseBody()
                  .blockFirst();
 
-         //create a test  character
+        //create a test character
         ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
+
+        JSONObject characterForm = new JSONObject();
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",35);
+        characterForm.put("weight",60);
+        characterForm.put("story","Also known as Captain Marvel");
         map.clear();
-        map.add("name", "Carol Danvers");
-        map.add("age", 23);
-        map.add("story", "Also known as CaptainMarvel");
-        map.add("weight", 65);
-        map.add("multipartImage", resource);
-
-
+        map.add("file",resource);
+        map.add("data",characterForm);
         this.webTestClient
                 .post()
                 .uri("/characters/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(String.class)
                 .isEqualTo("Character created successfully!");
-        //characterId = obtainAnyValidCharacterId();
+
+
         //create a  test movie
-        map.clear();
-        map.add("title", "Captain Marvel");
-        map.add("rating", 4);
-        map.add("releaseYear", 2019);
-        map.add("multipartImage", resource);
 
+        JSONObject movieForm = new JSONObject();
+        movieForm.put("title","Avengers: Endgame");
+        movieForm.put("rating",5);
+        movieForm.put("releaseYear",2019);
+
+        map.clear();
+        map.add("file",resource);
+        map.add("data",movieForm);
         this.webTestClient
                 .post()
                 .uri("/movies/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(String.class)
-                .isEqualTo("Movie  Captain Marvel created successfully");
+                .isEqualTo("Movie  Avengers: Endgame created successfully");
+
         // create a second test movie
-        map.clear();
-        map.add("title", "Ironman");
-        map.add("rating", 4);
-        map.add("releaseYear", 2008);
-        map.add("multipartImage", resource);
+        movieForm = new JSONObject();
+        movieForm.put("title","ironman");
+        movieForm.put("rating",4);
+        movieForm.put("releaseYear",2008);
 
+        map.clear();
+        map.add("file",resource);
+        map.add("data",movieForm);
         this.webTestClient
                 .post()
                 .uri("/movies/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(String.class)
-                .isEqualTo("Movie  Ironman created successfully");
-        //create a test genre
-        map.clear();
-        map.add("name", "Fantasy");
-        map.add("multipartImage", resource);
+                .isEqualTo("Movie  ironman created successfully");
 
+        //create a test genre
+        JSONObject genreForm = new JSONObject();
+        genreForm.put("name","Fantasy");
+
+        map.clear();
+        map.add("file",resource);
+        map.add("data",genreForm);
         this.webTestClient
                 .post()
                 .uri("/genres/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -175,27 +196,27 @@ public class MoviesApiIntegrationTests {
     }
     @Test
     public void createAccountWithInvalidData(){
-        LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("username", "J");
-        map.add("password", "juan1");
-        map.add("email", "juan1@email.com");
+        User user = new User();
+        user.setUsername("j");
+        user.setEmail(TESTEMAIL);
+        user.setPassword(TESTPASSWORD);
         this.webTestClient
                 .post()
                 .uri("/auth/register")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(user))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
 
-        map.clear();
-        map.add("username", "Juan1");
-        map.add("password", "j");
-        map.add("email", "juan1@email.com");
+        user.setUsername(TESTUSERNAME);
+        user.setPassword("ps");
         this.webTestClient
                 .post()
                 .uri("/auth/register")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(user))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus()
@@ -203,21 +224,21 @@ public class MoviesApiIntegrationTests {
     }
     @Test
     public void loginWithIncorrectCredentials(){
-        LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("username", "asdasda");
-        map.add("password", "faasdfafaan");
-        map.add("email", "asdasds@email.com");
-        Assertions.assertThat(map.containsKey("email"));
+        User user = new User();
+        user.setUsername("asdasdafas");
+        user.setEmail("adsadafggasd");
+        user.setPassword("asdagadgsfdgd");
         this.webTestClient
                 .post()
                 .uri("/auth/login")
-                .body(BodyInserters.fromMultipartData(map))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(user))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
-                .exchange().expectStatus()
+                .exchange()
+                .expectStatus()
                 .isOk()
                 .expectBody(String.class)
                 .isEqualTo("Incorrect username and/or password. try again");
-
     }
     @Test
     public void accessingProtectedResourceWithoutAuth() throws IOException {
@@ -253,20 +274,22 @@ public class MoviesApiIntegrationTests {
     }
     @Test
     public void createCharacterWithMissingFields() throws IOException {
-        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("name", "Carol Danvers");
-        map.add("age", 35);
-        map.add("multipartImage", resource);
-
-
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
+        JSONObject characterForm = new JSONObject();
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",35);
+        characterForm.put("weight",60);
+        map.clear();
+        map.add("file",resource);
+        map.add("data",characterForm);
         this.webTestClient
                 .post()
                 .uri("/characters/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
@@ -275,57 +298,64 @@ public class MoviesApiIntegrationTests {
     @Test
     public void createCharacterWithInvalidData() throws IOException {
         // with invalid age
-        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("name", "Carol Danvers");
-        map.add("age", -55);
-        map.add("story", "Also known as CaptainMarvel");
-        map.add("weight", 65);
-        map.add("multipartImage", resource);
-
-
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
+        JSONObject characterForm = new JSONObject();
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",-1);
+        characterForm.put("weight",60);
+        characterForm.put("story","Captain marvel");
+        map.clear();
+        map.add("file",resource);
+        map.add("data",characterForm);
         this.webTestClient
                 .post()
                 .uri("/characters/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
-                .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Character's age is invalid!");
-        // with invalid weight
-        map.set("age", 25);
-        map.set("weight", -65);
-
-
-
+                .isBadRequest();
+        //with invalid weight
+        characterForm = new JSONObject();
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",49);
+        characterForm.put("weight",-1);
+        characterForm.put("story","Captain marvel");
+        map.clear();
+        map.add("file",resource);
+        map.add("data",characterForm);
         this.webTestClient
                 .post()
                 .uri("/characters/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
-                .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Character's weight is invalid!");
+                .isBadRequest();
     }
     @Test
     public void editACharacterWithoutAuth() throws IOException {
         ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
-
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("id",1);
-        map.add("name", "Carol Danvers");
+        JSONObject characterForm = new JSONObject();
+        characterForm.put("id",1);
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",-1);
+        characterForm.put("weight",60);
+        characterForm.put("story","Captain marvel");
+        map.clear();
+        map.add("file",resource);
+        map.add("data",characterForm);
 
         this.webTestClient
                 .post()
                 .uri("/characters/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
                 .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .exchange()
@@ -335,44 +365,63 @@ public class MoviesApiIntegrationTests {
     @Test
     public void editACharacterWithInvalidData() throws IOException {
         //with invalid age
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("id",obtainAnyValidCharacterId());
-        map.add("age", -5);
+        JSONObject characterForm = new JSONObject();
+        characterForm.put("id",1);
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",-1);
+        characterForm.put("weight",60);
+        characterForm.put("story","Captain marvel");
+        map.clear();
+        map.add("file",resource);
+        map.add("data",characterForm);
 
         this.webTestClient
                 .post()
                 .uri("/characters/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
                 .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
-                .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Character's age is invalid!");
+                .isBadRequest();
         //With invalid weight
-        map.set("age", 25);
-        map.add("weight", -65);
-
+        characterForm = new JSONObject();
+        characterForm.put("id",1);
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",49);
+        characterForm.put("weight",-1);
+        characterForm.put("story","Captain marvel");
+        map.clear();
+        map.add("file",resource);
+        map.add("data",characterForm);
 
         this.webTestClient
                 .post()
                 .uri("/characters/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
                 .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
 
                 .exchange()
                 .expectStatus()
-                .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Character's weight is invalid!");
+                .isBadRequest();
     }
     @Test
-    public void editCharacterWithMissingRequiredParameterId(){
+    public void editCharacterWithMissingRequiredParameterId() throws IOException {
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("age", 10);
+        JSONObject characterForm = new JSONObject();
+        characterForm.put("name","Carol Danvers");
+        characterForm.put("age",-1);
+        characterForm.put("weight",60);
+        characterForm.put("story","Captain marvel");
+        map.clear();
+        map.add("file",resource);
+        map.add("data",characterForm);
 
         this.webTestClient
                 .post()
@@ -386,30 +435,33 @@ public class MoviesApiIntegrationTests {
                 .isBadRequest();
     }
     @Test
-    public void editCharacterWithAuthWorks(){
+    public void editCharacterWithAuthWorks() throws IOException {
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
+        JSONObject characterForm = new JSONObject();
         Long characterId = obtainAnyValidCharacterId();
         String newName = "new edited name";
         Integer newAge =  (int) ((Math.random() * (100 - 1)) + 1);
         Integer newWeight = (int) ((Math.random() * (100 - 1)) + 1);
         String newStory = "new edited story";
+        characterForm.put("id",characterId);
+        characterForm.put("name",newName);
+        characterForm.put("age",newAge);
+        characterForm.put("weight",newWeight);
+        characterForm.put("story",newStory);
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("id", characterId);
-        map.add("name", newName);
-        map.add("age", newAge);
-        map.add("weight", newWeight);
-        map.add("story", newStory);
-
+        map.add("file",resource);
+        map.add("data",characterForm);
         this.webTestClient
                 .post()
                 .uri("/characters/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
                 .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
                 .isOk();
-
+        //check if the character was edited successfully.
         this.webTestClient
                 .get()
                 .uri("/characters/detail?id="+characterId)
@@ -474,11 +526,11 @@ public class MoviesApiIntegrationTests {
                 .isOk()
                 .expectBody(Iterable.class)
                .returnResult().getResponseBody().spliterator().getExactSizeIfKnown();
-        Assertions.assertThat(numberOfCharacters == size); // Assertions are ignored for some reason..
+        Assertions.assertEquals(numberOfCharacters, size);
 
     }
     @Test
-    public void addAMovieToACharacterWorks(){
+    public void addAMovieToACharacterWorks() throws IOException {
         Long characterId = obtainAnyValidCharacterId();
         //check that the character doesn't have any movies
         this.webTestClient
@@ -494,34 +546,26 @@ public class MoviesApiIntegrationTests {
                 .jsonPath("movies").isEmpty();
 
         Long movieId = obtainAnyValidMovieId();
+        List<Long> moviesIdList = new ArrayList<>();
+        moviesIdList.add(movieId);
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
 
+        JSONObject characterForm = new JSONObject();
+        characterForm.put("id",characterId);
+        characterForm.put("moviesIds",moviesIdList);
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("id", characterId);
-        map.add("moviesIds", movieId);
-        // edit the character to add a movie.
+        map.add("file",resource);
+        map.add("data",characterForm);
         this.webTestClient
                 .post()
                 .uri("/characters/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
                 .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
-                .exchange()
-
-                .expectBody(String.class)
-                .isEqualTo("Character updated successfully");
-        //check that the character has a movie now.
-        this.webTestClient
-                .get()
-                .uri("/characters/detail?id="+characterId)
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
-                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
-                .isOk()
-                .expectBody()
-                .jsonPath("movies").isNotEmpty();
+                .isOk();
     }
     @Test
     public void createMovieWithMissingFields() throws IOException {
@@ -547,44 +591,62 @@ public class MoviesApiIntegrationTests {
     @Test
     public void createMovieWithInvalidData() throws IOException {
         // with invalid releaseYear
+        JSONObject movieForm = new JSONObject();
+        movieForm.put("title","Avengers: Endgame");
+        movieForm.put("rating",5);
+        movieForm.put("releaseYear",1492);
         ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("title", "Avengers");
-        map.add("releaseYear", 1492);
-        map.add("rating", 4);
-        map.add("multipartImage", resource);
-
-
+        map.add("file",resource);
+        map.add("data",movieForm);
         this.webTestClient
                 .post()
                 .uri("/movies/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
-                .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Movie release year can't be prior to 1900!");
-        // with invalid rating
-        map.set("rating", 6);
-        map.set("releaseYear", 2012);
+                .isBadRequest();
 
-
-
+        // with greater than 5 rating
+        movieForm = new JSONObject();
+        movieForm.put("title","Avengers: Endgame");
+        movieForm.put("rating",6);
+        movieForm.put("releaseYear",1999);
+        map.clear();
+        map.add("file",resource);
+        map.add("data",movieForm);
         this.webTestClient
                 .post()
                 .uri("/movies/add")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-
                 .exchange()
                 .expectStatus()
-                .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Movie rating has to be between 1 and 5");
+                .isBadRequest();
+
+        // with smaller than 1 rating
+        movieForm = new JSONObject();
+        movieForm.put("title","Avengers: Endgame");
+        movieForm.put("rating",0);
+        movieForm.put("releaseYear",1999);
+        map.clear();
+        map.add("file",resource);
+        map.add("data",movieForm);
+        this.webTestClient
+                .post()
+                .uri("/movies/add")
+                .contentType(MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(map))
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
     }
     @Test
     public void editAMovieWithoutAuth() throws IOException {
@@ -620,8 +682,7 @@ public class MoviesApiIntegrationTests {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Movie release year can't be prior to 1900!");
+                .expectBody(String.class);
         // with invalid rating
         map.set("rating", 6);
         map.set("releaseYear", 2012);
@@ -637,9 +698,7 @@ public class MoviesApiIntegrationTests {
 
                 .exchange()
                 .expectStatus()
-                .isBadRequest()
-                .expectBody(String.class)
-                .isEqualTo("Movie rating has to be between 1 and 5");
+                .isBadRequest();
     }
     @Test
     public void editMovieWithMissingRequiredParameterId(){
@@ -658,24 +717,27 @@ public class MoviesApiIntegrationTests {
                 .isBadRequest();
     }
     @Test
-    public void editMovieWithAuthWorks(){
+    public void editMovieWithAuthWorks() throws IOException {
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         Long movieId = obtainAnyValidMovieId();
         String newTitle = "new edited title";
         Integer newRating =  (int) ((Math.random() * (5 - 1)) + 1);
         Integer newReleaseYear = 1999;
-
-        LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("id", movieId);
-        map.add("title", newTitle);
-        map.add("releaseYear", newReleaseYear);
-        map.add("rating", newRating);
-
-
+        JSONObject movieForm = new JSONObject();
+        movieForm.put("id",movieId);
+        movieForm.put("title",newTitle);
+        movieForm.put("rating",newRating);
+        movieForm.put("releaseYear",newReleaseYear);
+        map.clear();
+        map.add("file",resource);
+        map.add("data",movieForm);
         this.webTestClient
                 .post()
                 .uri("/movies/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
                 .exchange()
                 .expectStatus()
@@ -735,21 +797,27 @@ public class MoviesApiIntegrationTests {
                 .isEqualTo("Movie with Id: "+ movieId +" doesn't exist");
     }
     @Test
-    public void deletingAGenreDoesNotDeleteAMovieAssociatedToIt(){
+    public void deletingAGenreDoesNotDeleteAMovieAssociatedToIt() throws IOException {
         //edit the movie to associate a genre
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         Long movieId = obtainAnyValidMovieId();
         Long genreId = obtainAnyValidGenreId();
+        List<Long> genreList = new ArrayList<>();
+        genreList.add(genreId);
+        JSONObject movieForm = new JSONObject();
+        movieForm.put("id",movieId);
+        movieForm.put("genresIds",genreList);
 
-        LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("id", movieId);
-        map.add("genresIds", genreId);
-
-
+        map.clear();
+        map.add("file",resource);
+        map.add("data",movieForm);
         this.webTestClient
                 .post()
                 .uri("/movies/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
                 .exchange()
                 .expectStatus()
@@ -807,28 +875,35 @@ public class MoviesApiIntegrationTests {
 
     }
     @Test
-    public void deletingAMovieDoesNotDeleteAGenreAssociatedToIt(){
+    public void deletingAMovieDoesNotDeleteAGenreAssociatedToIt() throws IOException {
 
         //edit the movie to associate a genre
+        LinkedMultiValueMap map = new LinkedMultiValueMap();
+        ByteArrayResource resource = new MultiPartResource(image.getBytes(), "image.jpg");
         Long movieId = obtainAnyValidMovieId();
         Long genreId = obtainAnyValidGenreId();
+        List<Long> genreList = new ArrayList<>();
+        genreList.add(genreId);
+        JSONObject movieForm = new JSONObject();
+        movieForm.put("id",movieId);
+        movieForm.put("genresIds",genreList);
 
-        LinkedMultiValueMap map = new LinkedMultiValueMap();
-        map.add("id", movieId);
-        map.add("genresIds", genreId);
-
-
+        map.clear();
+        map.add("file",resource);
+        map.add("data",movieForm);
         this.webTestClient
                 .post()
                 .uri("/movies/edit")
+                .contentType(MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(map))
-                .header(AUTHORIZATION,ACCEPT,APPLICATION_JSON_VALUE)
+                .header(ACCEPT,APPLICATION_JSON_VALUE)
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody(String.class)
                 .isEqualTo("Movie with Id: " + movieId +" updated successfully");
+
         //check that the genre was associated successfully
         this.webTestClient
                 .get()

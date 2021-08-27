@@ -1,7 +1,7 @@
 package com.moviesAPI.controllers;
 
 
-import com.moviesAPI.entities.Character;
+import com.moviesAPI.DTO.GenreDTO;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.services.GenreServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,12 +27,12 @@ public class GenreController {
 
     @PostMapping(path="/add") // Map ONLY POST Requests
     public @ResponseBody
-    String addNewGenre (@RequestParam String name, @RequestParam(required = false) List<Long> moviesIds ,
-                                                 @RequestParam MultipartFile multipartImage) throws IOException {
+    String addNewGenre (@RequestPart("data")@Valid GenreDTO genreDTO,
+                        @RequestPart("file")@Valid @NotNull MultipartFile file)  {
 
 
-        genreServices.createGenre(name,moviesIds,multipartImage);
-        return name +" Saved";
+        genreServices.createGenre(genreDTO,file);
+        return genreDTO.getName() +" Saved";
     }
     @DeleteMapping(path="/delete")
     public @ResponseBody String deleteGenre(@RequestParam Long id) {

@@ -1,10 +1,11 @@
 package com.moviesAPI.services;
 
+import com.moviesAPI.DTO.EditMovieDTO;
+import com.moviesAPI.DTO.MovieDTO;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.entities.Movie;
-import com.moviesAPI.exceptions.InvalidReleaseYearException;
-import com.moviesAPI.exceptions.InvalidMovieRatingException;
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.GenreRepository;
 import com.moviesAPI.repositories.MovieRepository;
@@ -27,61 +28,58 @@ public class MovieServices {
     @Autowired
     private GenreRepository genreRepository;
 
-    public void createMovie (String title, Integer releaseYear, Integer rating, List<Long> genresIds,
-                             List<Long> charactersIds, MultipartFile multipartImage)
-            throws IOException, InvalidReleaseYearException, InvalidMovieRatingException {
-        if (releaseYear <= 1900) {
-            throw new InvalidReleaseYearException("Movie release year can't be prior to 1900");
+    public void createMovie (MovieDTO movieDTO,MultipartFile file) {
+        Movie movie = new Movie();
+        movie.setTitle(movieDTO.getTitle());
+        movie.setRating(movieDTO.getRating());
+        movie.setReleaseYear(movieDTO.getReleaseYear());
+        try {
+            movie.setImage(file.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        if (rating < 1 || rating > 5) {
-            throw new InvalidMovieRatingException("Movie rating has to be a value between 1 and 5");
-        }
-        Movie movie = new Movie(multipartImage.getBytes(), title,releaseYear,rating);
-        if (charactersIds != null) {
-            addCharacters(movie,charactersIds);
+        //only previously added characters will be added to movie
+        if (movieDTO.getCharactersIds() != null) {
+            addCharacters(movie,movieDTO.getCharactersIds());
         }
         //only previously added genres will be added to movie
-        if (genresIds != null) {
-            addGenres(movie,genresIds);
+        if (movieDTO.getGenresIds() != null) {
+            addGenres(movie,movieDTO.getGenresIds());
         }
         movieRepository.save(movie);
     }
-    public boolean editMovie (Long id,String title, Integer releaseYear, Integer rating,List<Long> charactersIds,
-                              List<Long> genresIds,
-                              MultipartFile multipartImage) throws IOException, InvalidReleaseYearException, InvalidMovieRatingException {
-        Optional<Movie> movies = movieRepository.findById(id);
-
+    public boolean editMovie (EditMovieDTO movieDTO,
+                              MultipartFile file) {
+        Optional<Movie> movies = movieRepository.findById(movieDTO.getId());
 
         if (!movies.isPresent()) {
             return false;
         }
         Movie movie = movies.get();
-        if (title != null) {
-            movie.setTitle(title);
+        if (movieDTO.getTitle() != null) {
+            movie.setTitle(movieDTO.getTitle());
         }
-        if (releaseYear != null) {
-            if (releaseYear <= 1900) {
-                throw new InvalidReleaseYearException("Movie release year can't be prior to 1900");
-            }
-            movie.setReleaseYear(releaseYear);
+        if (movieDTO.getReleaseYear() != null) {
+            movie.setReleaseYear(movieDTO.getReleaseYear());
         }
-        if (rating != null) {
-            if (rating < 1 || rating > 5) {
-                throw new InvalidMovieRatingException("Movie rating has to be a value between 1 and 5");
-            }
-            movie.setRating(rating);
+        if (movieDTO.getRating() != null) {
+            movie.setRating(movieDTO.getRating());
         }
 
-        if (charactersIds != null) {
+        if (movieDTO.getCharactersIds() != null) {
             movie.setCharacters(new HashSet<>());  //removes previously added characters!
-            addCharacters(movie,charactersIds);
+            addCharacters(movie,movieDTO.getCharactersIds());
         }
-        if (genresIds != null) {
+        if (movieDTO.getGenresIds() != null) {
             movie.setCharacters(new HashSet<>());  //removes previously added genres!
-            addGenres(movie,genresIds);
+            addGenres(movie,movieDTO.getGenresIds());
         }
-        if (multipartImage != null) {
-            movie.setImage(multipartImage.getBytes());
+        if (file != null) {
+            try {
+                movie.setImage(file.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         movieRepository.save(movie);
         return true;

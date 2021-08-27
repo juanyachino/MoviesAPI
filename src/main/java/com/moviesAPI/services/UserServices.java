@@ -1,10 +1,10 @@
 package com.moviesAPI.services;
 
+import com.moviesAPI.DTO.UserLoginDTO;
+import com.moviesAPI.DTO.UserRegisterDTO;
 import com.moviesAPI.entities.User;
-import com.moviesAPI.exceptions.EmailAlreadyExistsException;
-import com.moviesAPI.exceptions.InvalidPasswordException;
-import com.moviesAPI.exceptions.InvalidUsernameException;
-import com.moviesAPI.exceptions.UsernameAlreadyTakenException;
+
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -29,40 +29,33 @@ public class UserServices {
     @Autowired
     EmailService sendGridEmailService;
 
-    public String login (String username, String password){
-        Optional<User> userFound = userRepository.findByUsername(username);
-        if ((!userFound.isPresent()) || !passwordEncoder.matches(password, userFound.get().getPassword())) {
+    public String login (UserLoginDTO userDTO){
+        Optional<User> userFound = userRepository.findByUsername(userDTO.getUsername());
+        if ((!userFound.isPresent()) || !passwordEncoder.matches(userDTO.getPassword(), userFound.get().getPassword())) {
             return "Incorrect username and/or password. try again";
         }
         User user = userFound.get();
-        String token = getJWTToken(username);
+        String token = getJWTToken(user.getUsername());
         user.setToken(token);
         userRepository.save(user);
         return token;
     }
-    public String register(String username, String password, String email)
-            throws InvalidUsernameException, InvalidPasswordException, UsernameAlreadyTakenException,
-            EmailAlreadyExistsException {
-        if (username.length() < 5) {
-            throw new InvalidUsernameException("the username must be at least 5 characters long!");
+    public String register (UserRegisterDTO userDTO) throws InvalidDataException {
+        if (userRepository.findByUsername(userDTO.getUsername()).isPresent()){
+            throw new InvalidDataException("the username is already taken");
         }
-        if (password.length() < 5) {
-            throw new InvalidPasswordException("the password must be at least 5 characters long!");
-        }
-        if (userRepository.findByEmail(email).isPresent()){
-            throw new EmailAlreadyExistsException("the email already exists");
-        }
-        if (userRepository.findByUsername(username).isPresent()){
-            throw new UsernameAlreadyTakenException("the username is already taken");
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()){
+            throw new InvalidDataException("the email already exists");
         }
         User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         userRepository.save(user);
-        sendWelcomeEmail(email,username);
+        sendWelcomeEmail(user.getEmail(),user.getUsername());
         return "account created successfully!";
     }
+
     private String getJWTToken(String username) {
         String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils

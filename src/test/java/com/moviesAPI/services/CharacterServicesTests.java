@@ -1,9 +1,10 @@
 package com.moviesAPI.services;
 
+import com.moviesAPI.DTO.CharacterDTO;
+import com.moviesAPI.DTO.EditCharacterDTO;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Movie;
-import com.moviesAPI.exceptions.InvalidAgeException;
-import com.moviesAPI.exceptions.InvalidWeightException;
+import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.MovieRepository;
 import org.junit.jupiter.api.Assertions;
@@ -40,21 +41,31 @@ public class CharacterServicesTests {
     MultipartFile image = new MockMultipartFile("image",new byte[32]);
 
     @Test
-    public void createCharacterTest() throws IOException, InvalidAgeException, InvalidWeightException {
+    public void createCharacterTest() throws IOException, InvalidDataException{
 
         long precount = characterRepository.count();
-        characterServices.createCharacter("TEST", "test", 123, 65,
-                new ArrayList<>(),image);
+        CharacterDTO character = new CharacterDTO();
+        character.setAge(65);
+        character.setName("TEST");
+        character.setStory("Test story");
+        characterServices.createCharacter(character,image);
         when(characterRepository.count()).thenReturn(Long.valueOf(1));
         Assertions.assertEquals(precount + 1 , characterRepository.count() );
 
     }
     @Test
-    public void editCharacterWorks() throws IOException, InvalidAgeException, InvalidWeightException {
+    public void editCharacterWorks() throws IOException, InvalidDataException {
         when(characterRepository.findById(1L)).thenReturn(
                 java.util.Optional.of(new Character(image.getBytes(), "String name", 30, 65, "String story")));
-
-        characterServices.editCharacter(1L,"newName","new story",40,55,new ArrayList<>(),image);
+        EditCharacterDTO characterDTO = new EditCharacterDTO();
+        characterDTO.setId(1L);
+        characterDTO.setAge(40);
+        characterDTO.setName("newName");
+        characterDTO.setStory("new story");
+        characterDTO.setWeight(55);
+        characterDTO.setMoviesIds(new ArrayList<>());
+        characterServices.editCharacter(characterDTO,image);
+        //characterServices.editCharacter(1L,"newName","new story",40,55,new ArrayList<>(),image);
         Character character = characterRepository.findById(1L).get();
 
         Assertions.assertEquals(character.getName() ,"newName");
@@ -62,7 +73,6 @@ public class CharacterServicesTests {
         Assertions.assertEquals(character.getAge() ,Integer.valueOf(40));
         Assertions.assertEquals(character.getWeight() ,Integer.valueOf(55));
         Assertions.assertEquals(character.getImage() ,image.getBytes());
-
 
 
     }
