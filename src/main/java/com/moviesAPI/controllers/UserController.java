@@ -1,6 +1,7 @@
 package com.moviesAPI.controllers;
 
 
+import com.moviesAPI.entities.User;
 import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 
 
 @RestController
@@ -17,28 +19,22 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private UserServices userServices;
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public ResponseEntity<String> login(@Valid @RequestBody User user)  {
         return new ResponseEntity<>(
-                userServices.login(username,password),
+                userServices.login(user.getUsername(),user.getPassword()),
                 HttpStatus.OK);
     }
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestParam("username") String username, @RequestParam("password") String password,
-                                   @RequestParam("email") String email) {
+    public ResponseEntity<String> register(@Valid @RequestBody User user)  {
         try {
-            return new ResponseEntity<>(
-                    userServices.register(username,password,email),
-                    HttpStatus.OK);
+            return ResponseEntity.ok(userServices.register(user));
         } catch (InvalidDataException e) {
             e.printStackTrace();
             return new ResponseEntity<>(
                     e.getMessage(),
                     HttpStatus.BAD_REQUEST);
         }
-    }
-    @RequestMapping("/csrf")
-    public CsrfToken csrf(CsrfToken token) {
-        return token;
     }
 }

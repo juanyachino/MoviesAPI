@@ -38,28 +38,19 @@ public class UserServices {
         userRepository.save(user);
         return token;
     }
-    public String register(String username, String password, String email)
-            throws InvalidDataException {
-        if (username.length() < 5) {
-            throw new InvalidDataException("the username must be at least 5 characters long!");
-        }
-        if (password.length() < 5) {
-            throw new InvalidDataException("the password must be at least 5 characters long!");
-        }
-        if (userRepository.findByEmail(email).isPresent()){
-            throw new InvalidDataException("the email already exists");
-        }
-        if (userRepository.findByUsername(username).isPresent()){
+    public String register (User user) throws InvalidDataException {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()){
             throw new InvalidDataException("the username is already taken");
         }
-        User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+        if (userRepository.findByEmail(user.getEmail()).isPresent()){
+            throw new InvalidDataException("the email already exists");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        sendWelcomeEmail(email,username);
+        sendWelcomeEmail(user.getEmail(),user.getUsername());
         return "account created successfully!";
     }
+
     private String getJWTToken(String username) {
         String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
