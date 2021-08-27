@@ -1,5 +1,7 @@
 package com.moviesAPI.services;
 
+import com.moviesAPI.DTO.CharacterDTO;
+import com.moviesAPI.DTO.EditCharacterDTO;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Movie;
 
@@ -23,8 +25,25 @@ public class CharacterServices {
     @Autowired
     private MovieRepository movieRepository;
 
+    public void createCharacter(CharacterDTO characterDTO,MultipartFile file) {
 
-    public void createCharacter (String name, String story, Integer age, Integer weight,
+        Character character = new Character();
+        character.setWeight(characterDTO.getWeight());
+        character.setStory(characterDTO.getStory());
+        character.setAge(characterDTO.getAge());
+        character.setName(characterDTO.getName());
+        try {
+            character.setImage(file.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //only previously added movies will be added to character
+        if (characterDTO.getMoviesIds() != null) {
+            addMovies(character, characterDTO.getMoviesIds());
+        }
+        characterRepository.save(character);
+    }
+    /*public void createCharacter (String name, String story, Integer age, Integer weight,
                                  List<Long> moviesIds, MultipartFile multipartImage) throws
             IOException, InvalidDataException {
         if (age <= 0 )  {
@@ -76,7 +95,7 @@ public class CharacterServices {
         }
         characterRepository.save(character);
         return true;
-    }
+    } */
     public Iterable getFilteredCharacterList(Integer age, Integer weight, String name,Long movieId){
         if (age != null) {
             return characterRepository.findByAge(age);
@@ -93,6 +112,39 @@ public class CharacterServices {
 
         }
         return characterRepository.findBy(); //returns all characters in list view if no params were given
+    }
+    public boolean editCharacter (EditCharacterDTO characterDTO, MultipartFile file)  {
+        Optional<Character> characters = characterRepository.findById(characterDTO.getId());
+
+        if (!characters.isPresent()) {
+            return false;
+        }
+        Character character = characters.get();
+        //only previously added movies will be added to character
+        if (characterDTO.getMoviesIds() != null) {
+            addMovies(character, characterDTO.getMoviesIds());
+        }
+        if (characterDTO.getName() != null) {
+            character.setName(characterDTO.getName());
+        }
+        if (characterDTO.getStory() != null) {
+            character.setStory(characterDTO.getStory());
+        }
+        if (characterDTO.getAge() != null) {
+            character.setAge(characterDTO.getAge());
+        }
+        if (characterDTO.getWeight() != null) {
+            character.setWeight(characterDTO.getWeight());
+        }
+        if (file != null) {
+            try {
+                character.setImage(file.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        characterRepository.save(character);
+        return true;
     }
     public boolean deleteCharacter (Long id) {
         Optional<Character> character = characterRepository.findById(id);

@@ -3,9 +3,11 @@ package com.moviesAPI.controllers;
 
 
 
+import com.moviesAPI.DTO.CharacterDTO;
+import com.moviesAPI.DTO.EditCharacterDTO;
 import com.moviesAPI.entities.Character;
 
-import com.moviesAPI.exceptions.InvalidDataException;
+
 import com.moviesAPI.services.CharacterServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Description;
@@ -16,8 +18,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.*;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+
+import javax.validation.constraints.NotNull;
+
 
 @Controller // This means that this class is a Controller
 @Validated
@@ -26,51 +31,26 @@ public class CharacterController {
     @Autowired
     private CharacterServices characterServices;
 
-    @PostMapping(path="/add") // Map ONLY POST Requests
-    public @ResponseBody ResponseEntity<String> addNewCharacter (@RequestParam String name,
-                                                 @RequestParam String story,
-                                                 @RequestParam Integer age,
-                                                 @RequestParam Integer weight,
-                                                 @RequestParam(required = false) List<Long> moviesIds ,
-                                                 @RequestParam MultipartFile multipartImage) throws IOException {
-
-        try {
-            characterServices.createCharacter(name,story,age,weight,moviesIds,multipartImage);
-        } catch (InvalidDataException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
-        }
+    @PostMapping("/add")
+    public ResponseEntity<String> addNewCharacter(@RequestPart("data")@Valid CharacterDTO characterDTO,
+                                                  @RequestPart("file")@Valid @NotNull MultipartFile file)  {
+        characterServices.createCharacter(characterDTO,file);
         return new ResponseEntity<>(
                 "Character created successfully!",
                 HttpStatus.OK);
     }
-
     @PostMapping(path="/edit")
     @Description("Edits any character's field. editing movies removes the previously saved movies!")
-    public @ResponseBody ResponseEntity<String> editCharacter (@RequestParam Long id,
-                                               @RequestParam(required = false) String name,
-                                                 @RequestParam(required = false) String story,
-                                                 @RequestParam(required = false) Integer age,
-                                                 @RequestParam(required = false) Integer weight,
-                                                 @RequestParam(required = false) List<Long> moviesIds ,
-                                                 @RequestParam(required = false) MultipartFile multipartImage) throws IOException {
+    public @ResponseBody ResponseEntity<String> editCharacter (@RequestPart("data")@Valid EditCharacterDTO characterDTO,
+                                                               @RequestPart("file")@Valid MultipartFile file) {
 
-        try {
-            return characterServices.editCharacter(id, name, story, age, weight, moviesIds, multipartImage) ?
+        return characterServices.editCharacter(characterDTO,file) ?
                     new ResponseEntity<>(
                             "Character updated successfully",
                             HttpStatus.OK) :
                     new ResponseEntity<>(
                             "Character doesn't exist",
                             HttpStatus.BAD_REQUEST);
-        } catch (InvalidDataException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(
-                    e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
-        }
     }
     @DeleteMapping(path="/delete")
     public @ResponseBody String deleteCharacter(@RequestParam Long id) {
