@@ -5,7 +5,6 @@ import com.moviesAPI.DTO.EditCharacterDTO;
 import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Movie;
 
-import com.moviesAPI.exceptions.InvalidDataException;
 import com.moviesAPI.repositories.CharacterRepository;
 import com.moviesAPI.repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,59 +41,6 @@ public class CharacterServices {
         }
         characterRepository.save(character);
     }
-    /*public void createCharacter (String name, String story, Integer age, Integer weight,
-                                 List<Long> moviesIds, MultipartFile multipartImage) throws
-            IOException, InvalidDataException {
-        if (age <= 0 )  {
-            throw new InvalidDataException("Age can not be a negative number!");
-        }
-        if (weight < 0) {
-            throw new InvalidDataException("Weight can not be a negative number!");
-        }
-        Character character = new Character(multipartImage.getBytes(), name,age,weight,story);
-        //only previously added movies will be added to character
-        if (moviesIds != null) {
-            addMovies(character, moviesIds);
-        }
-        characterRepository.save(character);
-    }
-    public boolean editCharacter (Long id,String name, String story, Integer age, Integer weight,
-                               List<Long> moviesIds, MultipartFile multipartImage) throws IOException, InvalidDataException {
-        Optional<Character> characters = characterRepository.findById(id);
-
-
-        if (!characters.isPresent()) {
-            return false;
-        }
-        Character character = characters.get();
-        if (name != null) {
-            character.setName(name);
-        }
-        if (story != null) {
-            character.setStory(story);
-        }
-        if (age != null) {
-            if (age <= 0 )  {
-                throw new InvalidDataException("Age can not be a negative number!");
-            }
-            character.setAge(age);
-        }
-        if (weight != null) {
-            if (weight < 0) {
-                throw new InvalidDataException("Weight can not be a negative number!");
-            }
-            character.setWeight(weight);
-        }
-        if (moviesIds != null) {
-            character.setMovies(new HashSet<>());  //removes previously added movies!
-            addMovies(character,moviesIds);
-        }
-        if (multipartImage != null) {
-            character.setImage(multipartImage.getBytes());
-        }
-        characterRepository.save(character);
-        return true;
-    } */
     public Iterable getFilteredCharacterList(Integer age, Integer weight, String name,Long movieId){
         if (age != null) {
             return characterRepository.findByAge(age);

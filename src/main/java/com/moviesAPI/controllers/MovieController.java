@@ -35,8 +35,7 @@ public class MovieController {
     @PostMapping(path="/add") // Map ONLY POST Requests
     public @ResponseBody ResponseEntity<String> addNewMovie (@RequestPart("data")@Valid MovieDTO movieDTO ,
                                                              @RequestPart("file")@Valid @NotNull MultipartFile file ){
-        // @ResponseBody means the returned String is the response, not a view name
-        // @RequestParam means it is a parameter from the GET or POST request
+
         movieServices.createMovie(movieDTO,file);
 
         return new ResponseEntity<>(
