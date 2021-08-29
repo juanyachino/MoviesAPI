@@ -1,7 +1,6 @@
 package com.moviesAPI.services;
 
 import com.moviesAPI.DTO.GenreDTO;
-import com.moviesAPI.entities.Character;
 import com.moviesAPI.entities.Genre;
 import com.moviesAPI.entities.Movie;
 import com.moviesAPI.repositories.GenreRepository;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 
 @Service

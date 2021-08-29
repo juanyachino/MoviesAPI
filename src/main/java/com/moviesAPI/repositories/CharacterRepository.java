@@ -19,7 +19,6 @@ public interface CharacterRepository extends CrudRepository<Character, Long> {
 
         byte[] getImage();
         String getName();
-        Long getId(); //test
     }
 
 }
