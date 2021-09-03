@@ -1,5 +1,6 @@
 package com.moviesAPI.security;
 
+
 import io.jsonwebtoken.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,6 +42,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         }
     }
 
+
     private Claims validateToken(HttpServletRequest request) {
         String jwtToken = request.getHeader(HEADER).replace(PREFIX, "");
         return Jwts.parser().setSigningKey(SECRET.getBytes()).parseClaimsJws(jwtToken).getBody();
@@ -58,7 +60,6 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
                 authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
         SecurityContextHolder.getContext().setAuthentication(auth);
-
     }
 
     private boolean JWTTokenExists(HttpServletRequest request, HttpServletResponse res) {
